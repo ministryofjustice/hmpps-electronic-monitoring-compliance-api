@@ -1,10 +1,13 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.domain.rule.battery
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.BatteryLevelRuleConfiguration
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluationResult
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryAtOrBelowThreshold
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
@@ -79,6 +82,28 @@ class BatteryLevelRuleV1Test {
     )
   }
 
+  @Test
+  fun `it should not evaluate using a configuration for another rule version`() {
+    // Given a battery level recorded event and a configuration for another rule version
+    val event = givenBatteryLevelReportedEvent(20)
+    val config = givenConfiguration(
+      20,
+      definition = RuleDefinition(
+        id = rule.definition.id,
+        version = RuleVersion(2),
+      ),
+    )
+
+    // When the rule is evaluated, then it should throw an exception
+    assertThatThrownBy {
+      rule.evaluate(
+        event,
+        config,
+      )
+    }.isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessage("Configuration rule definition does not match rule definition")
+  }
+
   private fun givenBatteryLevelReportedEvent(
     level: Int,
   ) = BatteryLevelReported(
@@ -90,7 +115,9 @@ class BatteryLevelRuleV1Test {
 
   private fun givenConfiguration(
     threshold: Int,
-  ) = BatteryLevelRuleConfiguration.createDraft(
+    definition: RuleDefinition<BatteryLevelRuleParameters> = rule.definition,
+  ) = RuleConfiguration.createDraft(
+    ruleDefinition = definition,
     revision = RuleConfigurationRevision(1),
     parameters = BatteryLevelRuleParameters(
       threshold = BatteryPercentage(threshold),

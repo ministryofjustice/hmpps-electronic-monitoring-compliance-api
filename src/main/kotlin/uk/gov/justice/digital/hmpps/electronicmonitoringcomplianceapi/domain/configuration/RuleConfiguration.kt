@@ -1,20 +1,16 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration
 
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRule
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import java.time.Instant
 import java.util.UUID
 
-class BatteryLevelRuleConfiguration
+class RuleConfiguration<P : RuleParameters>
 private constructor(
+  val ruleDefinition: RuleDefinition<P>,
   val id: RuleConfigurationId,
-  val ruleId: RuleId,
-  val ruleVersion: RuleVersion,
   val revision: RuleConfigurationRevision,
-  parameters: BatteryLevelRuleParameters,
+  parameters: P,
   status: RuleConfigurationStatus,
   val createdAt: Instant,
   val createdBy: String,
@@ -23,7 +19,7 @@ private constructor(
   effectiveFrom: Instant? = null,
 ) {
 
-  var parameters: BatteryLevelRuleParameters = parameters
+  var parameters: P = parameters
     private set
 
   var status: RuleConfigurationStatus = status
@@ -38,7 +34,7 @@ private constructor(
   var effectiveFrom: Instant? = effectiveFrom
     private set
 
-  fun updateParameters(parameters: BatteryLevelRuleParameters) {
+  fun updateParameters(parameters: P) {
     check(status == RuleConfigurationStatus.DRAFT) {
       "Only draft rule configurations can be changed"
     }
@@ -63,20 +59,20 @@ private constructor(
   }
 
   companion object {
-    fun createDraft(
+    fun <P : RuleParameters> createDraft(
+      ruleDefinition: RuleDefinition<P>,
       revision: RuleConfigurationRevision,
-      parameters: BatteryLevelRuleParameters,
+      parameters: P,
       createdAt: Instant,
       createdBy: String,
-    ): BatteryLevelRuleConfiguration {
+    ): RuleConfiguration<P> {
       require(createdBy.isNotBlank()) {
         "Created by must not be blank"
       }
 
-      return BatteryLevelRuleConfiguration(
+      return RuleConfiguration(
         id = RuleConfigurationId(UUID.randomUUID()),
-        ruleId = BatteryLevelRule.id,
-        ruleVersion = BatteryLevelRuleV1.version,
+        ruleDefinition = ruleDefinition,
         revision = revision,
         parameters = parameters,
         status = RuleConfigurationStatus.DRAFT,

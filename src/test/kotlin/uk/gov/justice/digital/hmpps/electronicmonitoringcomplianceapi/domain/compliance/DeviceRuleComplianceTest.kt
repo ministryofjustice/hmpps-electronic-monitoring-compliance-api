@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.domain.compliance
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
