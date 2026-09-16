@@ -1,0 +1,20 @@
+meta {
+  name: List rule configurations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/rule-configurations
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
