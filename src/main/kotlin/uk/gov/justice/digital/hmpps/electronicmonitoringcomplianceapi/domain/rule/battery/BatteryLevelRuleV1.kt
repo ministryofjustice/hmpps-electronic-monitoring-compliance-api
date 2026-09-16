@@ -9,10 +9,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
 
 class BatteryLevelRuleV1 : Rule<BatteryLevelReported, BatteryLevelRuleParameters> {
-  override val definition = RuleDefinition<BatteryLevelRuleParameters>(
-    id = BatteryLevelRule.id,
-    version = RuleVersion(1),
-  )
+  override val definition = ruleDefinition
 
   override fun evaluate(
     event: BatteryLevelReported,
@@ -38,10 +35,17 @@ class BatteryLevelRuleV1 : Rule<BatteryLevelReported, BatteryLevelRuleParameters
       eventId = event.eventId,
       recordedAt = event.recordedAt,
       ruleId = definition.id,
-      ruleVersion =definition.version,
+      ruleVersion = definition.version,
       configurationId = configuration.id,
       configurationRevision = configuration.revision,
       result = result,
+    )
+  }
+
+  companion object {
+    val ruleDefinition = RuleDefinition<BatteryLevelRuleParameters>(
+      id = BatteryLevelRule.id,
+      version = RuleVersion(1),
     )
   }
 }

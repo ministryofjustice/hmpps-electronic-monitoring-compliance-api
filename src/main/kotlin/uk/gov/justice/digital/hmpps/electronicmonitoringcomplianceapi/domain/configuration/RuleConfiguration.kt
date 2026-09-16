@@ -80,5 +80,29 @@ private constructor(
         createdBy = createdBy,
       )
     }
+
+    internal fun <P : RuleParameters> rehydrate(
+      id: RuleConfigurationId,
+      ruleDefinition: RuleDefinition<P>,
+      revision: RuleConfigurationRevision,
+      parameters: P,
+      status: RuleConfigurationStatus,
+      createdAt: Instant,
+      createdBy: String,
+      publishedAt: Instant?,
+      publishedBy: String?,
+      effectiveFrom: Instant?,
+    ): RuleConfiguration<P> = RuleConfiguration(
+      id = id,
+      ruleDefinition = ruleDefinition,
+      revision = revision,
+      parameters = parameters,
+      status = status,
+      createdAt = createdAt,
+      createdBy = createdBy,
+      publishedAt = publishedAt,
+      publishedBy = publishedBy,
+      effectiveFrom = effectiveFrom,
+    )
   }
 }
