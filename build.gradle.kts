@@ -11,6 +11,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-flyway")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
+  implementation("software.amazon.awssdk:athena:2.54.16")
+  implementation("software.amazon.awssdk:sts:2.54.16")
 
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")

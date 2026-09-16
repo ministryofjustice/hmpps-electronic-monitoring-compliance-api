@@ -72,3 +72,12 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+electronic-monitoring-datastore:
+  role-arn: ${DATASTORE_ROLE_ARN}
+  region: eu-west-2
+  session-name: ${DATASTORE_SESSION_NAME}
+  athena:
+    database: ${DATASTORE_ATHENA_DATABASE}
+    work-group: ${DATASTORE_ATHENA_WORKGROUP}
+    events-table: ${DATASTORE_ATHENA_EVENTS_TABLE}

@@ -17,3 +17,16 @@ springdoc:
 spring:
   jpa:
     show-sql: true
+
+electronic-monitoring-datastore:
+  role-arn: test-role
+  region: eu-west-2
+  session-name: test-session
+  athena:
+    database: test_database
+    work-group: test-workgroup
+    events-table: events
+    endpoint-url: http://localhost:8091
+
+aws:
+  endpoint-url: http://localhost:8091
