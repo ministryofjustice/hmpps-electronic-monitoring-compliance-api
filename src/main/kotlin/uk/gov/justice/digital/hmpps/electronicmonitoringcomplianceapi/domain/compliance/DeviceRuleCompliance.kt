@@ -2,22 +2,24 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.co
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluation
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluationResult
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import java.time.Instant
+import java.util.UUID
 
 // Represents the current state of whether a device is compliant with a rule
 class DeviceRuleCompliance private constructor(
+  val id: UUID,
   val deviceId: DeviceId,
-  val ruleId: RuleId,
+  val ruleDefinition: RuleDefinition<*>,
   state: ComplianceState,
-  stateChangedAt: Instant?,
+  stateChangedAt: Instant,
 ) {
 
   var state: ComplianceState = state
     private set
 
-  var stateChangedAt: Instant? = stateChangedAt
+  var stateChangedAt: Instant = stateChangedAt
     private set
 
   fun apply(
@@ -27,7 +29,7 @@ class DeviceRuleCompliance private constructor(
       "Evaluation belongs to a different device"
     }
 
-    require(evaluation.ruleId == ruleId) {
+    require(evaluation.ruleDefinition == ruleDefinition) {
       "Evaluation belongs to a different rule"
     }
 
@@ -52,7 +54,7 @@ class DeviceRuleCompliance private constructor(
       listOf(
         DeviceRuleComplianceEvent.StateChanged(
           deviceId = deviceId,
-          ruleId = ruleId,
+          ruleId = ruleDefinition.id,
           from = previousState,
           to = ComplianceState.COMPLIANT,
           occurredAt = evaluation.recordedAt,
@@ -77,7 +79,7 @@ class DeviceRuleCompliance private constructor(
       listOf(
         DeviceRuleComplianceEvent.StateChanged(
           deviceId = deviceId,
-          ruleId = ruleId,
+          ruleId = ruleDefinition.id,
           from = previousState,
           to = ComplianceState.NON_COMPLIANT,
           occurredAt = evaluation.recordedAt,
@@ -88,14 +90,34 @@ class DeviceRuleCompliance private constructor(
   }
 
   companion object {
-    fun create(
+    internal fun rehydrate(
+      id: UUID,
       deviceId: DeviceId,
-      ruleId: RuleId,
+      ruleDefinition: RuleDefinition<*>,
+      state: ComplianceState,
+      stateChangedAt: Instant,
     ): DeviceRuleCompliance = DeviceRuleCompliance(
+      id = id,
       deviceId = deviceId,
-      ruleId = ruleId,
-      state = ComplianceState.COMPLIANT,
-      stateChangedAt = null,
+      ruleDefinition = ruleDefinition,
+      state = state,
+      stateChangedAt = stateChangedAt,
+    )
+
+    fun from(
+      evaluation: RuleEvaluation,
+    ): DeviceRuleCompliance = DeviceRuleCompliance(
+      id = UUID.randomUUID(),
+      deviceId = evaluation.deviceId,
+      ruleDefinition = evaluation.ruleDefinition,
+      state = when (evaluation.result) {
+        RuleEvaluationResult.Compliant ->
+          ComplianceState.COMPLIANT
+
+        is RuleEvaluationResult.NonCompliant ->
+          ComplianceState.NON_COMPLIANT
+      },
+      stateChangedAt = evaluation.recordedAt,
     )
   }
 }

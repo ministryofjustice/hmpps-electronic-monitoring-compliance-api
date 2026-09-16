@@ -9,4 +9,10 @@ interface RuleConfigurationRepository : JpaRepository<RuleConfigurationEntity, U
   fun findAllByStatus(
     status: RuleConfigurationStatus,
   ): List<RuleConfigurationEntity>
+
+  fun findByRuleIdAndRuleVersionAndStatus(
+    ruleId: String,
+    ruleVersion: Int,
+    status: RuleConfigurationStatus,
+  ): RuleConfigurationEntity?
 }

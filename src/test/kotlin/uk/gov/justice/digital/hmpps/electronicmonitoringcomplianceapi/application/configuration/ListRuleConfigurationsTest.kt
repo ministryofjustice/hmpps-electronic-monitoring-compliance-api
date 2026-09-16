@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
@@ -34,6 +35,9 @@ class ListRuleConfigurationsTest {
     )
     val store = object : RuleConfigurationStore {
       override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = listOf(configuration)
+      override fun <P : RuleParameters> findPublished(
+        definition: RuleDefinition<P>,
+      ): RuleConfiguration<P>? = null
     }
 
     // When we list the rule configurations
@@ -58,6 +62,9 @@ class ListRuleConfigurationsTest {
     // Given an empty store
     val store = object : RuleConfigurationStore {
       override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = emptyList()
+      override fun <P : RuleParameters> findPublished(
+        definition: RuleDefinition<P>,
+      ): RuleConfiguration<P>? = null
     }
 
     // When we list the rule configurations

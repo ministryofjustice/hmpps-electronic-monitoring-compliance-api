@@ -9,9 +9,8 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluation
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluationResult
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryAtOrBelowThreshold
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.EventId
@@ -22,22 +21,15 @@ class DeviceRuleComplianceTest {
   private val deviceId = DeviceId(1)
 
   @Test
-  fun `it should start in the compliant state`() {
-    // Given a new rule compliance
-    val ruleCompliance = givenNewRuleCompliance()
-
-    // Then the state should be compliant
-    Assertions.assertThat(ruleCompliance.state).isEqualTo(ComplianceState.COMPLIANT)
-  }
-
-  @Test
   fun `it moves from compliant to non compliant when evaluation is non compliant`() {
-    // Given a new evaluation and a non-compliant rule evaluation
-    val ruleCompliance = givenNewRuleCompliance()
-    val ruleEvaluationResult = givenNonCompliantRuleEvaluationResult()
-    val ruleEvaluation = givenRuleEvaluation(result = ruleEvaluationResult, recordedAt = Instant.parse("2026-01-01T00:00:00.00Z"))
+    // Given a device that is compliant
+    val ruleCompliance = givenNewRuleCompliance(givenCompliantRuleEvaluation())
+    // And a later non-compliant evaluation
+    val ruleEvaluation = givenNonCompliantRuleEvaluation(
+      recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
+    )
 
-    // When a non-compliant evaluation is applied
+    // When the evaluation is applied
     val events = ruleCompliance.apply(
       evaluation = ruleEvaluation,
     )
@@ -49,10 +41,10 @@ class DeviceRuleComplianceTest {
     Assertions.assertThat(events).containsExactly(
       DeviceRuleComplianceEvent.StateChanged(
         deviceId = deviceId,
-        ruleId = RuleId("BATTERY_LEVEL"),
+        ruleId = BatteryLevelRuleV1.ruleDefinition.id,
         from = ComplianceState.COMPLIANT,
         to = ComplianceState.NON_COMPLIANT,
-        occurredAt = Instant.parse("2026-01-01T00:00:00.00Z"),
+        occurredAt = Instant.parse("2026-01-01T00:05:00.00Z"),
         evaluation = ruleEvaluation,
       ),
     )
@@ -60,27 +52,19 @@ class DeviceRuleComplianceTest {
 
   @Test
   fun `it remains non compliant when evaluation is non compliant`() {
-    // Given a new rule compliance and a non-compliant rule evaluation
-    val ruleCompliance = givenNewRuleCompliance()
-    val ruleEvaluationResult = givenNonCompliantRuleEvaluationResult()
-    val firstRuleEvaluation = givenRuleEvaluation(
-      result = ruleEvaluationResult,
-      recordedAt = Instant.parse("2026-01-01T00:00:00.00Z"),
-    )
-    val secondRuleEvaluation = givenRuleEvaluation(
-      result = ruleEvaluationResult,
+    // Given a device that is non-compliant
+    val ruleCompliance = givenNewRuleCompliance(givenNonCompliantRuleEvaluation())
+    // And a later non-compliant evaluation
+    val ruleEvaluation = givenNonCompliantRuleEvaluation(
       recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
     )
 
-    // And the device is already non-compliant
-    ruleCompliance.apply(firstRuleEvaluation)
-
-    // When a second non-compliant evaluation is applied
+    // When the evaluation is applied
     val events = ruleCompliance.apply(
-      secondRuleEvaluation,
+      ruleEvaluation,
     )
 
-    // Then the state should be non-compliant
+    // Then the state should remain non-compliant
     Assertions.assertThat(ruleCompliance.state).isEqualTo(ComplianceState.NON_COMPLIANT)
 
     // And a state changed event should not be emitted
@@ -89,18 +73,16 @@ class DeviceRuleComplianceTest {
 
   @Test
   fun `it moves from non-compliant to compliant when evaluation is compliant`() {
-    // Given a new rule compliance and a compliant rule evaluation
-    val ruleCompliance = givenNewRuleCompliance()
-    val ruleEvaluationResult = givenNonCompliantRuleEvaluationResult()
-    val firstRuleEvaluation = givenRuleEvaluation(result = ruleEvaluationResult, recordedAt = Instant.parse("2026-01-01T00:00:00.00Z"))
-    val secondRuleEvaluation = givenRuleEvaluation(result = RuleEvaluationResult.Compliant, recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"))
+    // Given a device that is non-compliant
+    val ruleCompliance = givenNewRuleCompliance(givenNonCompliantRuleEvaluation())
+    // And a later compliant evaluation
+    val ruleEvaluation = givenCompliantRuleEvaluation(
+      recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
+    )
 
-    // And the device is already non-compliant
-    ruleCompliance.apply(firstRuleEvaluation)
-
-    // When a compliant evaluation is applied
+    // When the evaluation is applied
     val events = ruleCompliance.apply(
-      secondRuleEvaluation,
+      ruleEvaluation,
     )
 
     // Then the state should be compliant
@@ -110,18 +92,17 @@ class DeviceRuleComplianceTest {
     Assertions.assertThat(events).containsExactly(
       DeviceRuleComplianceEvent.StateChanged(
         deviceId = deviceId,
-        ruleId = RuleId("BATTERY_LEVEL"),
+        ruleId = BatteryLevelRuleV1.ruleDefinition.id,
         from = ComplianceState.NON_COMPLIANT,
         to = ComplianceState.COMPLIANT,
         occurredAt = Instant.parse("2026-01-01T00:05:00.00Z"),
-        evaluation = secondRuleEvaluation,
+        evaluation = ruleEvaluation,
       ),
     )
   }
 
-  private fun givenNewRuleCompliance() = DeviceRuleCompliance.create(
-    deviceId = deviceId,
-    ruleId = RuleId("BATTERY_LEVEL"),
+  private fun givenNewRuleCompliance(evaluation: RuleEvaluation) = DeviceRuleCompliance.from(
+    evaluation = evaluation,
   )
 
   private fun givenRuleEvaluation(
@@ -131,8 +112,7 @@ class DeviceRuleComplianceTest {
     deviceId = deviceId,
     eventId = EventId(1),
     recordedAt = recordedAt,
-    ruleId = RuleId("BATTERY_LEVEL"),
-    ruleVersion = RuleVersion(1),
+    ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
     configurationId = RuleConfigurationId(UUID.randomUUID()),
     configurationRevision = RuleConfigurationRevision(1),
     result = result,
@@ -143,5 +123,19 @@ class DeviceRuleComplianceTest {
       actual = BatteryPercentage(10),
       threshold = BatteryPercentage(20),
     ),
+  )
+
+  private fun givenCompliantRuleEvaluation(
+    recordedAt: Instant = Instant.parse("2026-01-01T00:00:00.00Z"),
+  ) = givenRuleEvaluation(
+    result = RuleEvaluationResult.Compliant,
+    recordedAt = recordedAt,
+  )
+
+  private fun givenNonCompliantRuleEvaluation(
+    recordedAt: Instant = Instant.parse("2026-01-01T00:00:00.00Z"),
+  ) = givenRuleEvaluation(
+    result = givenNonCompliantRuleEvaluationResult(),
+    recordedAt = recordedAt,
   )
 }
