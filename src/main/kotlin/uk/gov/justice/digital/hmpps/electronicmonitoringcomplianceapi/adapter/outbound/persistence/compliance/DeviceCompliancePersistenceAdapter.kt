@@ -25,6 +25,10 @@ class DeviceCompliancePersistenceAdapter(
     )
   }
 
+  @Transactional(readOnly = true)
+  override fun findAll(): List<DeviceCompliance> = repository.findAll()
+    .map(mapper::toDomain)
+
   @Transactional
   override fun save(
     compliance: DeviceCompliance,

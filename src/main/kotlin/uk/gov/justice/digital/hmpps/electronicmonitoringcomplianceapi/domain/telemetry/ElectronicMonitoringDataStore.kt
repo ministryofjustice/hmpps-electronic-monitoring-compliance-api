@@ -4,4 +4,6 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.tel
 
 interface ElectronicMonitoringDataStore {
   fun getBatteryLevelReportedEvents(): Sequence<BatteryLevelReported>
+
+  fun getDevices(): Sequence<Device>
 }

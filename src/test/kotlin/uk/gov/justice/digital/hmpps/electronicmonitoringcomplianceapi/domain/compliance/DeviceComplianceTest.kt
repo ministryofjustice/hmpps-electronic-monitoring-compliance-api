@@ -83,23 +83,6 @@ class DeviceComplianceTest {
       .isEqualTo(ComplianceState.NON_COMPLIANT)
   }
 
-  @Test
-  fun `it should not evaluate a deactivated device`() {
-    val compliance = givenDeviceCompliance(
-      status = DeviceStatus.DEACTIVATED,
-    )
-
-    assertThatThrownBy {
-      compliance.apply(
-        givenCompliantRuleEvaluation(),
-      )
-    }
-      .isInstanceOf(IllegalArgumentException::class.java)
-      .hasMessage(
-        "Cannot evaluate compliance for a deactivated device",
-      )
-  }
-
   private fun givenDeviceCompliance(
     status: DeviceStatus = DeviceStatus.ACTIVATED,
   ) = DeviceCompliance.create(

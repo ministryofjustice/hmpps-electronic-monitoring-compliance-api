@@ -71,8 +71,8 @@ private constructor(
       }
 
       return RuleConfiguration(
-        id = RuleConfigurationId(UUID.randomUUID()),
         ruleDefinition = ruleDefinition,
+        id = RuleConfigurationId(UUID.randomUUID()),
         revision = revision,
         parameters = parameters,
         status = RuleConfigurationStatus.DRAFT,
@@ -93,8 +93,8 @@ private constructor(
       publishedBy: String?,
       effectiveFrom: Instant?,
     ): RuleConfiguration<P> = RuleConfiguration(
-      id = id,
       ruleDefinition = ruleDefinition,
+      id = id,
       revision = revision,
       parameters = parameters,
       status = status,

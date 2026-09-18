@@ -203,6 +203,8 @@ class EvaluateBatteryLevelEventTest {
       it.deviceId == deviceId
     }
 
+    override fun findAll(): List<DeviceCompliance> = listOf()
+
     override fun save(
       compliance: DeviceCompliance,
     ): DeviceCompliance {

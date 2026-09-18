@@ -80,6 +80,8 @@ electronic-monitoring-datastore:
   athena:
     database: ${DATASTORE_ATHENA_DATABASE}
     work-group: ${DATASTORE_ATHENA_WORKGROUP}
+    device-activations-table: ${DATASTORE_ATHENA_DEVICE_ACTIVATIONS_TABLE}
+    events-database: ${DATASTORE_ATHENA_EVENTS_DATABASE}
     events-table: ${DATASTORE_ATHENA_EVENTS_TABLE}
 
 backfill:

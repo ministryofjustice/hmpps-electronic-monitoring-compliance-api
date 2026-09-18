@@ -36,15 +36,36 @@ class DeviceCompliance private constructor(
   }
 
   fun apply(evaluation: RuleEvaluation): List<DeviceRuleComplianceEvent> {
-    require(status == DeviceStatus.ACTIVATED) {
-      "Cannot evaluate compliance for a deactivated device"
-    }
-
     val ruleCompliance = _ruleCompliance.single {
       it.ruleDefinition == evaluation.ruleDefinition
     }
 
     return ruleCompliance.apply(evaluation)
+  }
+
+  fun synchronise(
+    status: DeviceStatus,
+    ruleDefinitions: List<RuleDefinition<*>>,
+  ) {
+    this.status = status
+
+    val existingDefinitions =
+      _ruleCompliance.map { it.ruleDefinition }.toSet()
+
+    ruleDefinitions
+      .filterNot { it in existingDefinitions }
+      .forEach { ruleDefinition ->
+        _ruleCompliance.add(
+          DeviceRuleCompliance.create(
+            deviceId = deviceId,
+            ruleDefinition = ruleDefinition,
+          ),
+        )
+      }
+
+    _ruleCompliance.removeIf {
+      it.ruleDefinition !in ruleDefinitions
+    }
   }
 
   companion object {

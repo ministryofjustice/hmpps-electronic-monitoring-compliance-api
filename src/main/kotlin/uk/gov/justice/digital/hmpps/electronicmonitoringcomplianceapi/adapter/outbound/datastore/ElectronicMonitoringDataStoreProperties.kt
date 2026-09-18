@@ -12,6 +12,9 @@ data class ElectronicMonitoringDataStoreProperties(
 ) {
   data class AthenaProperties(
     val database: String,
+    // TODO - remove events database, use single database
+    val eventsDatabase: String,
+    val deviceActivationsTable: String,
     val eventsTable: String,
     val workGroup: String,
     val endpointUrl: URI? = null,

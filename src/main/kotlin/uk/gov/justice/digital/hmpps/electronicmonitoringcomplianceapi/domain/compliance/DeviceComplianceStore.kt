@@ -7,5 +7,7 @@ interface DeviceComplianceStore {
     deviceId: DeviceId,
   ): DeviceCompliance?
 
+  fun findAll(): List<DeviceCompliance>
+
   fun save(compliance: DeviceCompliance): DeviceCompliance
 }
