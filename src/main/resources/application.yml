@@ -81,3 +81,7 @@ electronic-monitoring-datastore:
     database: ${DATASTORE_ATHENA_DATABASE}
     work-group: ${DATASTORE_ATHENA_WORKGROUP}
     events-table: ${DATASTORE_ATHENA_EVENTS_TABLE}
+
+backfill:
+  battery-level:
+    enabled: ${BACKFILL_BATTERY_LEVEL:false}

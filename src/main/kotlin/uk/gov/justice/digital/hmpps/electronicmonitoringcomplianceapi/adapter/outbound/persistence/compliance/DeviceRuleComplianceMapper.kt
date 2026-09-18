@@ -20,9 +20,11 @@ class DeviceRuleComplianceMapper {
   )
 
   fun toEntity(
+    deviceCompliance: DeviceComplianceEntity,
     compliance: DeviceRuleCompliance,
   ): DeviceRuleComplianceEntity = DeviceRuleComplianceEntity(
     id = compliance.id,
+    deviceCompliance = deviceCompliance,
     deviceId = compliance.deviceId.value,
     ruleId = compliance.ruleDefinition.id.value,
     ruleVersion = compliance.ruleDefinition.version.value,

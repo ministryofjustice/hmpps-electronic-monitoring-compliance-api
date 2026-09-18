@@ -13,13 +13,12 @@ class DeviceRuleCompliance private constructor(
   val deviceId: DeviceId,
   val ruleDefinition: RuleDefinition<*>,
   state: ComplianceState,
-  stateChangedAt: Instant,
+  stateChangedAt: Instant?,
 ) {
-
   var state: ComplianceState = state
     private set
 
-  var stateChangedAt: Instant = stateChangedAt
+  var stateChangedAt: Instant? = stateChangedAt
     private set
 
   fun apply(
@@ -45,6 +44,7 @@ class DeviceRuleCompliance private constructor(
     ComplianceState.COMPLIANT -> emptyList()
 
     ComplianceState.NON_COMPLIANT,
+    ComplianceState.NO_DATA,
     -> {
       val previousState = state
 
@@ -70,6 +70,7 @@ class DeviceRuleCompliance private constructor(
     ComplianceState.NON_COMPLIANT -> emptyList()
 
     ComplianceState.COMPLIANT,
+    ComplianceState.NO_DATA,
     -> {
       val previousState = state
 
@@ -90,34 +91,29 @@ class DeviceRuleCompliance private constructor(
   }
 
   companion object {
+    fun create(
+      deviceId: DeviceId,
+      ruleDefinition: RuleDefinition<*>,
+    ): DeviceRuleCompliance = DeviceRuleCompliance(
+      id = UUID.randomUUID(),
+      deviceId = deviceId,
+      ruleDefinition = ruleDefinition,
+      state = ComplianceState.NO_DATA,
+      stateChangedAt = null,
+    )
+
     internal fun rehydrate(
       id: UUID,
       deviceId: DeviceId,
       ruleDefinition: RuleDefinition<*>,
       state: ComplianceState,
-      stateChangedAt: Instant,
+      stateChangedAt: Instant?,
     ): DeviceRuleCompliance = DeviceRuleCompliance(
       id = id,
       deviceId = deviceId,
       ruleDefinition = ruleDefinition,
       state = state,
       stateChangedAt = stateChangedAt,
-    )
-
-    fun from(
-      evaluation: RuleEvaluation,
-    ): DeviceRuleCompliance = DeviceRuleCompliance(
-      id = UUID.randomUUID(),
-      deviceId = evaluation.deviceId,
-      ruleDefinition = evaluation.ruleDefinition,
-      state = when (evaluation.result) {
-        RuleEvaluationResult.Compliant ->
-          ComplianceState.COMPLIANT
-
-        is RuleEvaluationResult.NonCompliant ->
-          ComplianceState.NON_COMPLIANT
-      },
-      stateChangedAt = evaluation.recordedAt,
     )
   }
 }

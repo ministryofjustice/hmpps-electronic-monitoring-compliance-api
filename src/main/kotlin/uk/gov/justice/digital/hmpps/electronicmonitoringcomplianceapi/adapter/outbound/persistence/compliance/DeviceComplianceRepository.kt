@@ -3,11 +3,9 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.o
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
-interface DeviceRuleComplianceRepository : JpaRepository<DeviceRuleComplianceEntity, UUID> {
+interface DeviceComplianceRepository : JpaRepository<DeviceComplianceEntity, UUID> {
 
-  fun findByDeviceIdAndRuleIdAndRuleVersion(
+  fun findByDeviceId(
     deviceId: Int,
-    ruleId: String,
-    ruleVersion: Int,
-  ): DeviceRuleComplianceEntity?
+  ): DeviceComplianceEntity?
 }

@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance
 
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleCompliance
@@ -21,9 +22,26 @@ class DeviceRuleComplianceTest {
   private val deviceId = DeviceId(1)
 
   @Test
+  fun `it should start with no data`() {
+    // Given a new device rule compliance
+    val compliance = DeviceRuleCompliance.create(
+      deviceId = DeviceId(1),
+      ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
+    )
+
+    // Then the state should be NO_DATA
+    assertThat(compliance.state)
+      .isEqualTo(ComplianceState.NO_DATA)
+
+    // And the state changed at should be null
+    assertThat(compliance.stateChangedAt)
+      .isNull()
+  }
+
+  @Test
   fun `it moves from compliant to non compliant when evaluation is non compliant`() {
     // Given a device that is compliant
-    val ruleCompliance = givenNewRuleCompliance(givenCompliantRuleEvaluation())
+    val ruleCompliance = givenExistingRuleCompliance(state = ComplianceState.COMPLIANT)
     // And a later non-compliant evaluation
     val ruleEvaluation = givenNonCompliantRuleEvaluation(
       recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
@@ -53,7 +71,7 @@ class DeviceRuleComplianceTest {
   @Test
   fun `it remains non compliant when evaluation is non compliant`() {
     // Given a device that is non-compliant
-    val ruleCompliance = givenNewRuleCompliance(givenNonCompliantRuleEvaluation())
+    val ruleCompliance = givenExistingRuleCompliance(state = ComplianceState.NON_COMPLIANT)
     // And a later non-compliant evaluation
     val ruleEvaluation = givenNonCompliantRuleEvaluation(
       recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
@@ -74,7 +92,7 @@ class DeviceRuleComplianceTest {
   @Test
   fun `it moves from non-compliant to compliant when evaluation is compliant`() {
     // Given a device that is non-compliant
-    val ruleCompliance = givenNewRuleCompliance(givenNonCompliantRuleEvaluation())
+    val ruleCompliance = givenExistingRuleCompliance(state = ComplianceState.NON_COMPLIANT)
     // And a later compliant evaluation
     val ruleEvaluation = givenCompliantRuleEvaluation(
       recordedAt = Instant.parse("2026-01-01T00:05:00.00Z"),
@@ -101,8 +119,14 @@ class DeviceRuleComplianceTest {
     )
   }
 
-  private fun givenNewRuleCompliance(evaluation: RuleEvaluation) = DeviceRuleCompliance.from(
-    evaluation = evaluation,
+  private fun givenExistingRuleCompliance(
+    state: ComplianceState = ComplianceState.COMPLIANT,
+  ) = DeviceRuleCompliance.rehydrate(
+    id = UUID.randomUUID(),
+    deviceId = deviceId,
+    ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
+    state = state,
+    stateChangedAt = Instant.parse("2026-01-01T00:00:00.00Z"),
   )
 
   private fun givenRuleEvaluation(

@@ -4,7 +4,10 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
@@ -16,13 +19,24 @@ import java.util.UUID
   name = "device_rule_compliance",
   uniqueConstraints = [
     UniqueConstraint(
-      columnNames = ["device_id", "rule_id", "rule_version"],
+      columnNames = [
+        "device_compliance_id",
+        "rule_id",
+        "rule_version",
+      ],
     ),
   ],
 )
 class DeviceRuleComplianceEntity(
   @Id
   val id: UUID,
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+    name = "device_compliance_id",
+    nullable = false,
+  )
+  val deviceCompliance: DeviceComplianceEntity,
 
   @Column(name = "device_id", nullable = false)
   val deviceId: Int,
@@ -35,8 +49,8 @@ class DeviceRuleComplianceEntity(
 
   @Enumerated(EnumType.STRING)
   @Column(name = "state", nullable = false)
-  val state: ComplianceState,
+  var state: ComplianceState,
 
-  @Column(name = "state_changed_at", nullable = false)
-  val stateChangedAt: Instant,
+  @Column(name = "state_changed_at")
+  var stateChangedAt: Instant?,
 )

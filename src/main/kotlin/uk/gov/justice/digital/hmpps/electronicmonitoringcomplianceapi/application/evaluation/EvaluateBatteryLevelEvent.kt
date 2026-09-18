@@ -1,8 +1,7 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.evaluation
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleCompliance
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
@@ -10,7 +9,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.tel
 @Service
 class EvaluateBatteryLevelEvent(
   private val ruleConfigurationStore: RuleConfigurationStore,
-  private val deviceRuleComplianceStore: DeviceRuleComplianceStore,
+  private val deviceComplianceStore: DeviceComplianceStore,
 ) {
   private val rule = BatteryLevelRuleV1()
 
@@ -20,26 +19,16 @@ class EvaluateBatteryLevelEvent(
     ) ?: throw IllegalStateException(
       "No published configuration for ${rule.definition.id.value} v${rule.definition.version.value}",
     )
+    val deviceCompliance = deviceComplianceStore.find(event.deviceId)
+      ?: error("Device compliance not initialised")
 
     val evaluation = rule.evaluate(
       event = event,
       configuration = configuration,
     )
 
-    val compliance = deviceRuleComplianceStore.find(
-      deviceId = event.deviceId,
-      ruleDefinition = rule.definition,
-    )
+    deviceCompliance.apply(evaluation)
 
-    if (compliance == null) {
-      deviceRuleComplianceStore.save(
-        DeviceRuleCompliance.from(evaluation),
-      )
-      return
-    }
-
-    compliance.apply(evaluation)
-
-    deviceRuleComplianceStore.save(compliance)
+    deviceComplianceStore.save(deviceCompliance)
   }
 }

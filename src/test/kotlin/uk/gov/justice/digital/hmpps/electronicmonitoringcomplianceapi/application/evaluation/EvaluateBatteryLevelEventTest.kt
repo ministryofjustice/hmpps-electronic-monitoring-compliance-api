@@ -4,8 +4,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleCompliance
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
@@ -27,34 +29,30 @@ class EvaluateBatteryLevelEventTest {
   private val rule = BatteryLevelRuleV1()
 
   @Test
-  fun `it should create a compliance record from first evaluation`() {
+  fun `it should fail when device compliance has not been initialised`() {
     // Given a published configuration with a threshold of 20%
-    val configuration = givenPublishedConfiguration(threshold = 20)
-    val configurationStore = FakeRuleConfigurationStore(configuration)
-    val complianceStore = FakeDeviceRuleComplianceStore()
-    val useCase = EvaluateBatteryLevelEvent(
-      ruleConfigurationStore = configurationStore,
-      deviceRuleComplianceStore = complianceStore,
-    )
+    val configuration =
+      givenPublishedConfiguration(threshold = 20)
 
-    // When a battery level event with a battery percentage of 10% is evaluated
-    useCase.evaluate(
-      givenBatteryLevelReported(
-        batteryPercentage = 10,
-        recordedAt = Instant.parse("2026-01-01T10:00:00Z"),
-      ),
-    )
+    // And a device compliance store that does not contain a record for the device
+    val useCase =
+      EvaluateBatteryLevelEvent(
+        ruleConfigurationStore =
+        FakeRuleConfigurationStore(configuration),
+        deviceComplianceStore =
+        FakeDeviceComplianceStore(),
+      )
 
-    val compliance = complianceStore.saved.single()
-
-    // Then a new non-compliance record is created
-    assertThat(compliance.deviceId).isEqualTo(DeviceId(123))
-    assertThat(compliance.ruleDefinition)
-      .isEqualTo(BatteryLevelRuleV1.ruleDefinition)
-    assertThat(compliance.state)
-      .isEqualTo(ComplianceState.NON_COMPLIANT)
-    assertThat(compliance.stateChangedAt)
-      .isEqualTo(Instant.parse("2026-01-01T10:00:00Z"))
+    // When a rule is evaluated, then it should throw
+    assertThatThrownBy {
+      useCase.evaluate(
+        givenBatteryLevelReported(
+          batteryPercentage = 10,
+        ),
+      )
+    }
+      .isInstanceOf(IllegalStateException::class.java)
+      .hasMessage("Device compliance not initialised")
   }
 
   @Test
@@ -62,21 +60,12 @@ class EvaluateBatteryLevelEventTest {
     // Given a published configuration with a threshold of 20%
     val configuration = givenPublishedConfiguration(threshold = 20)
 
-    // And an existing non-compliance record for the device
-    val existing = DeviceRuleCompliance.from(
-      rule.evaluate(
-        givenBatteryLevelReported(
-          batteryPercentage = 10,
-          recordedAt = Instant.parse("2026-01-01T10:00:00Z"),
-        ),
-        configuration,
-      ),
-    )
+    // And an existing non-compliant record for the device
     val configurationStore = FakeRuleConfigurationStore(configuration)
-    val complianceStore = FakeDeviceRuleComplianceStore(existing)
+    val complianceStore = FakeDeviceComplianceStore(givenExistingDeviceCompliance())
     val useCase = EvaluateBatteryLevelEvent(
       ruleConfigurationStore = configurationStore,
-      deviceRuleComplianceStore = complianceStore,
+      deviceComplianceStore = complianceStore,
     )
 
     // When a battery level event with a battery percentage of 50% is evaluated
@@ -89,10 +78,16 @@ class EvaluateBatteryLevelEventTest {
 
     val compliance = complianceStore.saved.single()
 
-    // Then the existing compliance record is updated to compliant
+    // Then the device should be marked as compliant
     assertThat(compliance.state)
       .isEqualTo(ComplianceState.COMPLIANT)
-    assertThat(compliance.stateChangedAt)
+
+    // And the rule compliance record should be updated to compliant
+    assertThat(compliance.ruleCompliance.single().state)
+      .isEqualTo(ComplianceState.COMPLIANT)
+
+    // And the state changed time should be updated to the time of the evaluation
+    assertThat(compliance.ruleCompliance.single().stateChangedAt)
       .isEqualTo(Instant.parse("2026-01-01T10:05:00Z"))
   }
 
@@ -101,7 +96,7 @@ class EvaluateBatteryLevelEventTest {
     // Given no published configuration for the battery level rule
     val useCase = EvaluateBatteryLevelEvent(
       ruleConfigurationStore = FakeRuleConfigurationStore(null),
-      deviceRuleComplianceStore = FakeDeviceRuleComplianceStore(),
+      deviceComplianceStore = FakeDeviceComplianceStore(),
     )
 
     // When a battery level event is evaluated, it should throw an exception
@@ -123,20 +118,10 @@ class EvaluateBatteryLevelEventTest {
     val configuration = givenPublishedConfiguration(threshold = 20)
 
     // And an existing non-compliance record for the device
-    val existing = DeviceRuleCompliance.from(
-      rule.evaluate(
-        givenBatteryLevelReported(
-          batteryPercentage = 10,
-          recordedAt = Instant.parse("2026-01-01T10:00:00Z"),
-        ),
-        configuration,
-      ),
-    )
-
-    val complianceStore = FakeDeviceRuleComplianceStore(existing)
+    val complianceStore = FakeDeviceComplianceStore(givenExistingDeviceCompliance())
     val useCase = EvaluateBatteryLevelEvent(
       ruleConfigurationStore = FakeRuleConfigurationStore(configuration),
-      deviceRuleComplianceStore = complianceStore,
+      deviceComplianceStore = complianceStore,
     )
 
     // When a battery level event with a battery percentage of 5% is evaluated
@@ -149,11 +134,16 @@ class EvaluateBatteryLevelEventTest {
 
     val compliance = complianceStore.saved.single()
 
-    // Then the existing compliance record remains non-compliant
-    assertThat(compliance.state).isEqualTo(ComplianceState.NON_COMPLIANT)
+    // Then the device record should remain non-compliant
+    assertThat(compliance.state)
+      .isEqualTo(ComplianceState.NON_COMPLIANT)
+
+    // And the rule compliance record should remain non-compliant
+    assertThat(compliance.ruleCompliance.single().state)
+      .isEqualTo(ComplianceState.NON_COMPLIANT)
 
     // And the state changed time does not change
-    assertThat(compliance.stateChangedAt)
+    assertThat(compliance.ruleCompliance.single().stateChangedAt)
       .isEqualTo(Instant.parse("2026-01-01T10:00:00Z"))
   }
 
@@ -184,23 +174,38 @@ class EvaluateBatteryLevelEventTest {
     effectiveFrom = Instant.parse("2026-01-01T09:00:00Z"),
   )
 
-  private class FakeDeviceRuleComplianceStore(
-    private var compliance: DeviceRuleCompliance? = null,
-  ) : DeviceRuleComplianceStore {
+  private fun givenExistingDeviceCompliance(
+    state: ComplianceState = ComplianceState.NON_COMPLIANT,
+  ): DeviceCompliance = DeviceCompliance.rehydrate(
+    id = UUID.randomUUID(),
+    deviceId = DeviceId(123),
+    status = DeviceStatus.ACTIVATED,
+    ruleCompliance = listOf(
+      DeviceRuleCompliance.rehydrate(
+        id = UUID.randomUUID(),
+        deviceId = DeviceId(123),
+        ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
+        state = state,
+        stateChangedAt = Instant.parse("2026-01-01T10:00:00Z"),
+      ),
+    ),
+  )
 
-    val saved = mutableListOf<DeviceRuleCompliance>()
+  private class FakeDeviceComplianceStore(
+    private var compliance: DeviceCompliance? = null,
+  ) : DeviceComplianceStore {
+
+    val saved = mutableListOf<DeviceCompliance>()
 
     override fun find(
       deviceId: DeviceId,
-      ruleDefinition: RuleDefinition<*>,
-    ): DeviceRuleCompliance? = compliance?.takeIf {
-      it.deviceId == deviceId &&
-        it.ruleDefinition == ruleDefinition
+    ): DeviceCompliance? = compliance?.takeIf {
+      it.deviceId == deviceId
     }
 
     override fun save(
-      compliance: DeviceRuleCompliance,
-    ): DeviceRuleCompliance {
+      compliance: DeviceCompliance,
+    ): DeviceCompliance {
       this.compliance = compliance
       saved += compliance
       return compliance
