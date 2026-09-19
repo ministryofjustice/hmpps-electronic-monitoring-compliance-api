@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 
 @Component
@@ -28,6 +29,8 @@ class DeviceCompliancePersistenceAdapter(
   @Transactional(readOnly = true)
   override fun findAll(): List<DeviceCompliance> = repository.findAll()
     .map(mapper::toDomain)
+
+  override fun findAllSummaries(): List<DeviceComplianceSummary> = repository.findAllSummaries()
 
   @Transactional
   override fun save(

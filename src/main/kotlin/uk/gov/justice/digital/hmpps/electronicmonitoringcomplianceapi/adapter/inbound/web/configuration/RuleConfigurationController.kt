@@ -12,5 +12,5 @@ class RuleConfigurationController(
   private val listRuleConfigurations: ListRuleConfigurations,
 ) {
   @GetMapping
-  fun list(): List<RuleConfigurationSummary> = listRuleConfigurations.list()
+  fun listRuleConfigurations(): List<RuleConfigurationSummary> = listRuleConfigurations.list()
 }
