@@ -1,0 +1,20 @@
+meta {
+  name: Get device compliance
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/device-compliance/d4d854e9-4538-46c2-bf3d-6b0b81d07cae
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isObject
+}

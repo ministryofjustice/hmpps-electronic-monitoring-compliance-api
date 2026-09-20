@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.adapter.inbound.web.compliance
 
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.compliance.DeviceComplianceRepository
@@ -31,48 +33,51 @@ class DeviceComplianceControllerTest : IntegrationTestBase() {
     repository.deleteAll()
   }
 
-  @Test
-  fun `it should list device compliance`() {
-    // Given a compliant device
-    val compliant = givenDeviceCompliance(
-      deviceId = 123,
-      status = DeviceStatus.ACTIVATED,
-    )
-
-    compliant.apply(
-      givenCompliantEvaluation(
+  @Nested
+  @DisplayName("GET /v1/device-compliance")
+  inner class ListDeviceCompliance {
+    @Test
+    fun `it should list device compliance`() {
+      // Given a compliant device
+      val compliant = givenDeviceCompliance(
         deviceId = 123,
-      ),
-    )
-
-    deviceComplianceStore.save(compliant)
-
-    // And a device without compliant rule data
-    deviceComplianceStore.save(
-      givenDeviceCompliance(
-        deviceId = 456,
         status = DeviceStatus.ACTIVATED,
-      ),
-    )
+      )
 
-    // And a deactivated device
-    deviceComplianceStore.save(
-      givenDeviceCompliance(
-        deviceId = 789,
-        status = DeviceStatus.DEACTIVATED,
-      ),
-    )
+      compliant.apply(
+        givenCompliantEvaluation(
+          deviceId = 123,
+        ),
+      )
 
-    webTestClient
-      .get()
-      .uri("/v1/device-compliance")
-      .headers(setAuthorisation())
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .json(
-        """
+      deviceComplianceStore.save(compliant)
+
+      // And a device without compliant rule data
+      deviceComplianceStore.save(
+        givenDeviceCompliance(
+          deviceId = 456,
+          status = DeviceStatus.ACTIVATED,
+        ),
+      )
+
+      // And a deactivated device
+      deviceComplianceStore.save(
+        givenDeviceCompliance(
+          deviceId = 789,
+          status = DeviceStatus.DEACTIVATED,
+        ),
+      )
+
+      webTestClient
+        .get()
+        .uri("/v1/device-compliance")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .json(
+          """
           {
             "summary": {
               "compliant": 1,
@@ -97,8 +102,84 @@ class DeviceComplianceControllerTest : IntegrationTestBase() {
               }
             ]
           }
-        """.trimIndent(),
+          """.trimIndent(),
+        )
+    }
+  }
+
+  @Nested
+  @DisplayName("GET /v1/device-compliance/{deviceComplianceId}")
+  inner class GetDeviceCompliance {
+    @Test
+    fun `it should get device compliance by id`() {
+      // Given a device compliance with a rule evaluation
+      val compliance = givenDeviceCompliance(
+        deviceId = 123,
+        status = DeviceStatus.ACTIVATED,
       )
+
+      compliance.apply(
+        givenCompliantEvaluation(
+          deviceId = 123,
+        ),
+      )
+
+      deviceComplianceStore.save(compliance)
+
+      // When we get the device compliance by id, then the result should be correct
+      webTestClient
+        .get()
+        .uri("/v1/device-compliance/${compliance.id}")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .json(
+          """
+          {
+            "deviceId": 123,
+            "status": "ACTIVATED",
+            "state": "COMPLIANT",
+            "stateChangedAt": "2026-01-01T10:00:00Z",
+            "rules": [
+              {
+                "ruleId": "${BatteryLevelRuleV1.ruleDefinition.id.value}",
+                "ruleVersion": ${BatteryLevelRuleV1.ruleDefinition.version.value},
+                "state": "COMPLIANT",
+                "stateChangedAt": "2026-01-01T10:00:00Z"
+              }
+            ]
+          }
+          """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun `it should return not found when device compliance does not exist`() {
+      webTestClient
+        .get()
+        .uri(
+          "/v1/device-compliance/${UUID.randomUUID()}",
+        )
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return bad request when device compliance id is not a uuid`() {
+      webTestClient
+        .get()
+        .uri(
+          "/v1/device-compliance/not-a-uuid",
+        )
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
   }
 
   private fun givenDeviceCompliance(

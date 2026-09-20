@@ -13,9 +13,10 @@ interface DeviceComplianceRepository : JpaRepository<DeviceComplianceEntity, UUI
   @Query(
     """
       SELECT
-        deviceId as deviceId,
-        status as status,
-        state as state
+        id,
+        deviceId,
+        status,
+        state
       FROM DeviceComplianceEntity
       ORDER BY deviceId
     """,

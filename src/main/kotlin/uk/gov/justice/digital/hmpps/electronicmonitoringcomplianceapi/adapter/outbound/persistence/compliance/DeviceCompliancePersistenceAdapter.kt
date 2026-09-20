@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.com
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
+import java.util.UUID
 
 @Component
 class DeviceCompliancePersistenceAdapter(
@@ -25,6 +26,13 @@ class DeviceCompliancePersistenceAdapter(
       entity = entity,
     )
   }
+
+  @Transactional(readOnly = true)
+  override fun findById(
+    id: UUID,
+  ): DeviceCompliance? = repository.findById(id)
+    .map(mapper::toDomain)
+    .orElse(null)
 
   @Transactional(readOnly = true)
   override fun findAll(): List<DeviceCompliance> = repository.findAll()

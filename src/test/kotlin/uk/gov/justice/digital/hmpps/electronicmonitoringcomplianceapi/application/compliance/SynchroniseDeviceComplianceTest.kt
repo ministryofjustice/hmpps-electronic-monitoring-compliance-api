@@ -277,6 +277,8 @@ class SynchroniseDeviceComplianceTest {
       deviceId: DeviceId,
     ): DeviceCompliance? = compliance[deviceId]
 
+    override fun findById(id: UUID): DeviceCompliance? = null
+
     override fun findAll(): List<DeviceCompliance> = compliance.values.toList()
 
     override fun findAllSummaries(): List<DeviceComplianceSummary> = listOf()

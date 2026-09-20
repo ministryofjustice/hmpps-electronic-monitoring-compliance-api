@@ -85,16 +85,19 @@ class ListDeviceComplianceTest {
     assertThat(result.devices)
       .containsExactly(
         DeviceComplianceSummary(
+          id = compliant.id,
           deviceId = DeviceId(1),
           status = DeviceStatus.ACTIVATED,
           state = ComplianceState.COMPLIANT,
         ),
         DeviceComplianceSummary(
+          id = nonCompliant.id,
           deviceId = DeviceId(2),
           status = DeviceStatus.ACTIVATED,
           state = ComplianceState.NON_COMPLIANT,
         ),
         DeviceComplianceSummary(
+          id = deactivated.id,
           deviceId = DeviceId(3),
           status = DeviceStatus.DEACTIVATED,
           state = null,
@@ -161,10 +164,13 @@ class ListDeviceComplianceTest {
       it.deviceId == deviceId
     }
 
+    override fun findById(id: UUID): DeviceCompliance? = null
+
     override fun findAll(): List<DeviceCompliance> = compliance
 
     override fun findAllSummaries(): List<DeviceComplianceSummary> = compliance.map {
       DeviceComplianceSummary(
+        id = it.id,
         deviceId = it.deviceId,
         status = it.status,
         state = it.state,
