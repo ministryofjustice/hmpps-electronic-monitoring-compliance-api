@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.co
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
+import java.util.UUID
 
 interface RuleConfigurationStore {
   fun findPublished(): List<RuleConfiguration<out RuleParameters>>
@@ -9,4 +10,8 @@ interface RuleConfigurationStore {
   fun <P : RuleParameters> findPublished(
     definition: RuleDefinition<P>,
   ): RuleConfiguration<P>?
+
+  fun findById(
+    id: UUID,
+  ): RuleConfiguration<out RuleParameters>?
 }

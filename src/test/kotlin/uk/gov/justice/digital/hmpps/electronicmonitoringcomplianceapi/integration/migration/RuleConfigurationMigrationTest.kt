@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.configuration.RuleConfigurationRepository
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.MigrationIntegrationTestBase
 
-class RuleConfigurationMigrationTest : IntegrationTestBase() {
+class RuleConfigurationMigrationTest : MigrationIntegrationTestBase() {
 
   @Autowired
   private lateinit var repository: RuleConfigurationRepository
 
   @Test
-  fun `creates the initial battery level rule configuration`() {
+  fun `it should create the initial battery level rule configuration`() {
     val configurations =
       repository.findAllByStatus(RuleConfigurationStatus.PUBLISHED)
 

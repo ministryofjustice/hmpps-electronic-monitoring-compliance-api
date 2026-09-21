@@ -5,6 +5,9 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import java.util.UUID
 
@@ -59,4 +62,12 @@ class DeviceCompliancePersistenceAdapter(
       repository.save(entity),
     )
   }
+
+  override fun getRuleComplianceSummary(
+    ruleId: RuleId,
+    ruleVersion: RuleVersion,
+  ): DeviceRuleComplianceCounts = repository.getRuleComplianceSummary(
+    ruleId = ruleId.value,
+    ruleVersion = ruleVersion.value,
+  )
 }

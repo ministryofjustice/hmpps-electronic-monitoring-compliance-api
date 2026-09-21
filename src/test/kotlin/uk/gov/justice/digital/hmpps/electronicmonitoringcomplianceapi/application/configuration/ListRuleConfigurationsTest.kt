@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicati
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationSummary
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
@@ -38,6 +39,7 @@ class ListRuleConfigurationsTest {
       override fun <P : RuleParameters> findPublished(
         definition: RuleDefinition<P>,
       ): RuleConfiguration<P>? = null
+      override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
     }
 
     // When we list the rule configurations
@@ -47,6 +49,7 @@ class ListRuleConfigurationsTest {
     // Then the result should contain a single rule configuration summary
     assertThat(result).containsExactly(
       RuleConfigurationSummary(
+        id = configuration.id.value,
         ruleId = "BATTERY_LEVEL",
         ruleVersion = 1,
         revision = 3,
@@ -65,6 +68,7 @@ class ListRuleConfigurationsTest {
       override fun <P : RuleParameters> findPublished(
         definition: RuleDefinition<P>,
       ): RuleConfiguration<P>? = null
+      override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
     }
 
     // When we list the rule configurations

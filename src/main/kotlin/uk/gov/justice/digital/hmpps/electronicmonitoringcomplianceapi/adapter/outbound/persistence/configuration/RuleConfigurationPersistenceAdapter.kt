@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
+import java.util.UUID
 
 @Component
 class RuleConfigurationPersistenceAdapter(
@@ -28,4 +29,9 @@ class RuleConfigurationPersistenceAdapter(
     )
     ?.let(mapper::toDomain)
     as RuleConfiguration<P>?
+
+  override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = repository
+    .findById(id)
+    .map(mapper::toDomain)
+    .orElse(null)
 }

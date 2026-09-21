@@ -8,11 +8,14 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.ou
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluation
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.evaluation.RuleEvaluationResult
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.EventId
@@ -35,8 +38,8 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
 
   @Test
   fun `it should save and retrieve device compliance`() {
-    // Given an activated device with an unevaluated battery level rule
-    val compliance = givenDeviceCompliance()
+    // Given a device with an unevaluated battery level rule
+    val compliance = givenDeviceCompliance(state = ComplianceState.NO_DATA)
 
     // When the compliance is saved
     store.save(compliance)
@@ -46,26 +49,13 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
 
     assertThat(saved).isNotNull
 
-    assertThat(saved!!.id)
-      .isEqualTo(compliance.id)
-
-    assertThat(saved.deviceId)
-      .isEqualTo(DeviceId(123))
-
-    assertThat(saved.status)
-      .isEqualTo(DeviceStatus.ACTIVATED)
-
-    assertThat(saved.state)
-      .isEqualTo(ComplianceState.NON_COMPLIANT)
-
-    assertThat(saved.ruleCompliance.single().ruleDefinition)
-      .isEqualTo(BatteryLevelRuleV1.ruleDefinition)
-
-    assertThat(saved.ruleCompliance.single().state)
-      .isEqualTo(ComplianceState.NO_DATA)
-
-    assertThat(saved.ruleCompliance.single().stateChangedAt)
-      .isNull()
+    assertThat(saved!!.id).isEqualTo(compliance.id)
+    assertThat(saved.deviceId).isEqualTo(DeviceId(123))
+    assertThat(saved.status).isEqualTo(DeviceStatus.ACTIVATED)
+    assertThat(saved.state).isEqualTo(ComplianceState.NON_COMPLIANT)
+    assertThat(saved.ruleCompliance.single().ruleDefinition).isEqualTo(BatteryLevelRuleV1.ruleDefinition)
+    assertThat(saved.ruleCompliance.single().state).isEqualTo(ComplianceState.NO_DATA)
+    assertThat(saved.ruleCompliance.single().stateChangedAt).isNull()
   }
 
   @Test
@@ -75,8 +65,7 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
 
     store.save(compliance)
 
-    val originalRuleComplianceId =
-      compliance.ruleCompliance.single().id
+    val originalRuleComplianceId = compliance.ruleCompliance.single().id
 
     // And the battery level rule becomes compliant
     compliance.apply(
@@ -192,18 +181,117 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
     assertThat(compliance).isNull()
   }
 
-  private fun givenDeviceCompliance(): DeviceCompliance = DeviceCompliance.create(
-    deviceId = DeviceId(123),
-    status = DeviceStatus.ACTIVATED,
-    ruleDefinitions = listOf(
-      BatteryLevelRuleV1.ruleDefinition,
-    ),
-  )
+  @Test
+  fun `it should summarise device compliance for a rule`() {
+    // Given a set of devices with different compliance states for the battery level rule
+    store.save(
+      givenDeviceCompliance(
+        deviceId = 1,
+        status = DeviceStatus.ACTIVATED,
+        state = ComplianceState.COMPLIANT,
+      ),
+    )
+    store.save(
+      givenDeviceCompliance(
+        deviceId = 2,
+        status = DeviceStatus.ACTIVATED,
+        state = ComplianceState.COMPLIANT,
+      ),
+    )
+    store.save(
+      givenDeviceCompliance(
+        deviceId = 3,
+        status = DeviceStatus.ACTIVATED,
+        state = ComplianceState.NON_COMPLIANT,
+      ),
+    )
+    store.save(
+      givenDeviceCompliance(
+        deviceId = 4,
+        status = DeviceStatus.ACTIVATED,
+        state = ComplianceState.NO_DATA,
+      ),
+    )
+    store.save(
+      givenDeviceCompliance(
+        deviceId = 5,
+        status = DeviceStatus.DEACTIVATED,
+        state = ComplianceState.COMPLIANT,
+      ),
+    )
+
+    // When we summarise the compliance for the battery level rule
+    val result =
+      store.getRuleComplianceSummary(
+        ruleId = BatteryLevelRuleV1.ruleDefinition.id,
+        ruleVersion = BatteryLevelRuleV1.ruleDefinition.version,
+      )
+
+    // Then the summary should reflect the counts of each compliance state
+    assertThat(result)
+      .isEqualTo(
+        DeviceRuleComplianceCounts(
+          compliant = 2,
+          nonCompliant = 1,
+          noData = 1,
+          deactivated = 1,
+        ),
+      )
+  }
+
+  @Test
+  fun `it should return zero counts when there is no compliance for rule`() {
+    // Given no devices with compliance for a rule that does not exist
+    // When we summarise the compliance for the non-existent rule
+    val result =
+      store.getRuleComplianceSummary(
+        ruleId = RuleId("UNKNOWN"),
+        ruleVersion = RuleVersion(1),
+      )
+
+    // Then the summary should return zero counts for all states
+    assertThat(result)
+      .isEqualTo(
+        DeviceRuleComplianceCounts(
+          compliant = 0,
+          nonCompliant = 0,
+          noData = 0,
+          deactivated = 0,
+        ),
+      )
+  }
+
+  private fun givenDeviceCompliance(
+    deviceId: Int = 123,
+    status: DeviceStatus = DeviceStatus.ACTIVATED,
+    state: ComplianceState = ComplianceState.NON_COMPLIANT,
+  ): DeviceCompliance {
+    val deviceCompliance = DeviceCompliance.create(
+      deviceId = DeviceId(deviceId),
+      status = status,
+      ruleDefinitions = listOf(
+        BatteryLevelRuleV1.ruleDefinition,
+      ),
+    )
+
+    val ruleEvaluation = when (state) {
+      ComplianceState.COMPLIANT -> givenCompliantRuleEvaluation(deviceId = deviceId)
+      ComplianceState.NON_COMPLIANT -> givenNonCompliantRuleEvaluation(deviceId = deviceId)
+      ComplianceState.NO_DATA -> null
+    }
+
+    ruleEvaluation?.let {
+      deviceCompliance.apply(it)
+    }
+
+    return deviceCompliance
+  }
 
   private fun givenCompliantRuleEvaluation(
+    deviceId: Int = 123,
     recordedAt: Instant = Instant.parse("2026-01-01T10:00:00Z"),
   ): RuleEvaluation = RuleEvaluation(
-    deviceId = DeviceId(123),
+    deviceId = DeviceId(deviceId),
     eventId = EventId(1),
     recordedAt = recordedAt,
     ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
@@ -213,9 +301,10 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
   )
 
   private fun givenNonCompliantRuleEvaluation(
+    deviceId: Int = 123,
     recordedAt: Instant = Instant.parse("2026-01-01T10:00:00Z"),
   ): RuleEvaluation = RuleEvaluation(
-    deviceId = DeviceId(123),
+    deviceId = DeviceId(deviceId),
     eventId = EventId(2),
     recordedAt = recordedAt,
     ruleDefinition = BatteryLevelRuleV1.ruleDefinition,

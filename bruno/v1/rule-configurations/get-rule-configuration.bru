@@ -1,0 +1,20 @@
+meta {
+  name: Get rule configuration
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/rule-configurations/5ab3c9c9-5628-4496-b696-19f1dd2537b9
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isObject
+}

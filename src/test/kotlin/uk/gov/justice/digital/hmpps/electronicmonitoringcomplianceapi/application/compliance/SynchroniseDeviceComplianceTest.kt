@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.com
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
@@ -13,7 +14,9 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
@@ -293,6 +296,13 @@ class SynchroniseDeviceComplianceTest {
 
       return compliance
     }
+
+    override fun getRuleComplianceSummary(ruleId: RuleId, ruleVersion: RuleVersion): DeviceRuleComplianceCounts = DeviceRuleComplianceCounts(
+      compliant = 0,
+      nonCompliant = 0,
+      noData = 0,
+      deactivated = 0,
+    )
   }
 
   private class FakeRuleConfigurationStore(
@@ -306,6 +316,8 @@ class SynchroniseDeviceComplianceTest {
     override fun <P : RuleParameters> findPublished(
       definition: RuleDefinition<P>,
     ): RuleConfiguration<P>? = null
+
+    override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
 
     private fun givenFakeRuleConfiguration(
       definition: RuleDefinition<BatteryLevelRuleParameters>,
