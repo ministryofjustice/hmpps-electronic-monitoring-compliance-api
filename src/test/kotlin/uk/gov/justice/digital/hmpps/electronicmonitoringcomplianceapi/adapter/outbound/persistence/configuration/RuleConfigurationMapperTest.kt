@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.o
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
@@ -11,7 +12,8 @@ import java.time.Instant
 import java.util.UUID
 
 class RuleConfigurationMapperTest {
-  private val mapper = RuleConfigurationMapper()
+  private val jsonMapper = JsonMapper.builder().build()
+  private val mapper = RuleConfigurationMapper(jsonMapper)
 
   @Test
   fun `it should map a battery level rule configuration entity to domain`() {

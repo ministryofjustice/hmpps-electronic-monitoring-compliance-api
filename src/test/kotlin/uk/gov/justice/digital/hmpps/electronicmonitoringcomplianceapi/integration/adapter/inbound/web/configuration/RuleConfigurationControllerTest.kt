@@ -1,10 +1,12 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.integration.adapter.inbound.web.configuration
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.compliance.DeviceComplianceEntity
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.compliance.DeviceComplianceRepository
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.compliance.DeviceRuleComplianceEntity
@@ -204,6 +206,162 @@ class RuleConfigurationControllerTest : IntegrationTestBase() {
       }
           """.trimIndent(),
         )
+    }
+  }
+
+  @Nested
+  @DisplayName("POST /v1/rule-configurations/{id}/draft")
+  inner class CreateRuleConfigurationDraft {
+    @Test
+    fun `it should create a rule configuration draft`() {
+      // Given a published rule configuration
+      val source =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.PUBLISHED,
+            threshold = 20,
+          ),
+        )
+
+      // When the endpoint is called, a draft should be created
+      webTestClient
+        .post()
+        .uri("/v1/rule-configurations/${source.id}/draft")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+            {
+              "parameters": {
+                "threshold": 50
+              }
+            }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isCreated
+        .expectBody()
+        .jsonPath("$.ruleId")
+        .isEqualTo("BATTERY_LEVEL")
+        .jsonPath("$.ruleVersion")
+        .isEqualTo(1)
+        .jsonPath("$.revision")
+        .isEqualTo(2)
+        .jsonPath("$.status")
+        .isEqualTo("DRAFT")
+        .jsonPath("$.parameters.threshold")
+        .isEqualTo(50)
+
+      // Then a draft should be created in the repository
+      val draft =
+        repository.findByRuleIdAndRuleVersionAndStatus(
+          "BATTERY_LEVEL",
+          1,
+          RuleConfigurationStatus.DRAFT,
+        )
+
+      assertThat(draft).isNotNull
+      assertThat(draft!!.revision).isEqualTo(2)
+      assertThat(draft.parameters["threshold"])
+        .isEqualTo(50)
+    }
+
+    @Test
+    fun `it should return conflict when a draft already exists`() {
+      // Given a published rule configuration and an existing draft
+      val source =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.PUBLISHED,
+            threshold = 20,
+          ),
+        )
+
+      repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 30,
+        ),
+      )
+
+      // When the endpoint is called, it should return a conflict response
+      webTestClient
+        .post()
+        .uri("/v1/rule-configurations/${source.id}/draft")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+            {
+              "parameters": {
+                "threshold": 50
+              }
+            }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isEqualTo(409)
+        .expectBody()
+        .jsonPath("$.developerMessage")
+        .isEqualTo(
+          "A draft already exists for BATTERY_LEVEL v1",
+        )
+    }
+
+    @Test
+    fun `it should return not found when draft source does not exist`() {
+      webTestClient
+        .post()
+        .uri("/v1/rule-configurations/${UUID.randomUUID()}/draft")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+            {
+              "parameters": {
+                "threshold": 50
+              }
+            }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return bad request when draft parameters are invalid`() {
+      // Given a published rule configuration
+      val source =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.PUBLISHED,
+            threshold = 20,
+          ),
+        )
+
+      // When the endpoint is called with invalid parameters, it should return a bad request response
+      webTestClient
+        .post()
+        .uri("/v1/rule-configurations/${source.id}/draft")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+            {
+              "parameters": {}
+            }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isBadRequest
     }
   }
 

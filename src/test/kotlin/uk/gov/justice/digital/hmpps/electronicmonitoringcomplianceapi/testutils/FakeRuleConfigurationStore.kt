@@ -30,14 +30,24 @@ class FakeRuleConfigurationStore(
         it.ruleDefinition == definition
     } as RuleConfiguration<P>?
 
+  @Suppress("UNCHECKED_CAST")
+  override fun <P : RuleParameters> findDraft(
+    definition: RuleDefinition<P>,
+  ): RuleConfiguration<P>? = configurations.values
+    .firstOrNull {
+      it.status == RuleConfigurationStatus.DRAFT &&
+        it.ruleDefinition == definition
+    } as RuleConfiguration<P>?
+
   override fun findById(
     id: UUID,
   ): RuleConfiguration<out RuleParameters>? = configurations[id]
 
-  fun save(
+  override fun save(
     configuration: RuleConfiguration<out RuleParameters>,
-  ) {
+  ): RuleConfiguration<out RuleParameters> {
     configurations[configuration.id.value] =
       configuration
+    return configuration
   }
 }

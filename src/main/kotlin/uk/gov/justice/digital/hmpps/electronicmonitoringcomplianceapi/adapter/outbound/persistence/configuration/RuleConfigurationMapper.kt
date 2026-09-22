@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.persistence.configuration
 
 import org.springframework.stereotype.Component
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
@@ -11,7 +13,9 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
 
 @Component
-class RuleConfigurationMapper {
+class RuleConfigurationMapper(
+  private val jsonMapper: JsonMapper,
+) {
   fun toDomain(
     entity: RuleConfigurationEntity,
   ): RuleConfiguration<out RuleParameters> = when {
@@ -23,6 +27,25 @@ class RuleConfigurationMapper {
         "Unknown rule definition: ${entity.ruleId} v${entity.ruleVersion}",
       )
   }
+
+  fun toEntity(
+    configuration: RuleConfiguration<out RuleParameters>,
+  ): RuleConfigurationEntity = RuleConfigurationEntity(
+    id = configuration.id.value,
+    ruleId = configuration.ruleDefinition.id.value,
+    ruleVersion = configuration.ruleDefinition.version.value,
+    revision = configuration.revision.value,
+    status = configuration.status,
+    parameters = jsonMapper.convertValue(
+      configuration.parameters,
+      object : TypeReference<Map<String, Any>>() {},
+    ),
+    createdAt = configuration.createdAt,
+    createdBy = configuration.createdBy,
+    publishedAt = configuration.publishedAt,
+    publishedBy = configuration.publishedBy,
+    effectiveFrom = configuration.effectiveFrom,
+  )
 
   private fun toBatteryLevelRuleConfiguration(
     entity: RuleConfigurationEntity,

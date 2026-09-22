@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.config
 
+import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
@@ -49,6 +51,34 @@ class ElectronicMonitoringComplianceApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.info("Entity not found exception: {}", e.message) }
+
+  @ExceptionHandler(IllegalArgumentException::class)
+  fun handleIllegalArgumentException(
+    e: IllegalArgumentException,
+  ): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(
+      ErrorResponse(
+        status = BAD_REQUEST,
+        userMessage = "Bad Request",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Illegal argument exception: {}", e.message) }
+
+  @ExceptionHandler(
+    EntityExistsException::class,
+  )
+  fun handleEntityExistsException(
+    e: EntityExistsException,
+  ): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(HttpStatus.CONFLICT)
+    .body(
+      ErrorResponse(
+        status = HttpStatus.CONFLICT,
+        userMessage = "Conflict",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Entity exists exception: {}", e.message) }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   fun handleMethodArgumentTypeMismatch(

@@ -30,8 +30,28 @@ class RuleConfigurationPersistenceAdapter(
     ?.let(mapper::toDomain)
     as RuleConfiguration<P>?
 
+  @Suppress("UNCHECKED_CAST")
+  override fun <P : RuleParameters> findDraft(
+    definition: RuleDefinition<P>,
+  ): RuleConfiguration<P>? = repository
+    .findByRuleIdAndRuleVersionAndStatus(
+      definition.id.value,
+      definition.version.value,
+      RuleConfigurationStatus.DRAFT,
+    )
+    ?.let(mapper::toDomain)
+    as RuleConfiguration<P>?
+
   override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = repository
     .findById(id)
     .map(mapper::toDomain)
     .orElse(null)
+
+  override fun save(
+    configuration: RuleConfiguration<out RuleParameters>,
+  ): RuleConfiguration<out RuleParameters> = mapper.toDomain(
+    repository.save(
+      mapper.toEntity(configuration),
+    ),
+  )
 }

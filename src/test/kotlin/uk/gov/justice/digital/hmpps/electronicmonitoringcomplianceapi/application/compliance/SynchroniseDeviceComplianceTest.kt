@@ -8,23 +8,15 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.com
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceStatus
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.Device
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.ElectronicMonitoringDataStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
-import java.time.Instant
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeRuleConfigurationStore
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.RuleComplianceFixtures.givenPublishedBatteryLevelConfiguration
 import java.util.UUID
 
 class SynchroniseDeviceComplianceTest {
@@ -45,9 +37,7 @@ class SynchroniseDeviceComplianceTest {
     val useCase = SynchroniseDeviceCompliance(
       datastore = datastore,
       ruleConfigurationStore = FakeRuleConfigurationStore(
-        definitions = listOf(
-          BatteryLevelRuleV1.ruleDefinition,
-        ),
+        listOf(givenPublishedBatteryLevelConfiguration()),
       ),
       deviceComplianceStore = complianceStore,
     )
@@ -99,9 +89,7 @@ class SynchroniseDeviceComplianceTest {
     val useCase = SynchroniseDeviceCompliance(
       datastore = datastore,
       ruleConfigurationStore = FakeRuleConfigurationStore(
-        definitions = listOf(
-          BatteryLevelRuleV1.ruleDefinition,
-        ),
+        listOf(givenPublishedBatteryLevelConfiguration()),
       ),
       deviceComplianceStore = complianceStore,
     )
@@ -141,9 +129,7 @@ class SynchroniseDeviceComplianceTest {
         ),
       ),
       ruleConfigurationStore = FakeRuleConfigurationStore(
-        definitions = listOf(
-          BatteryLevelRuleV1.ruleDefinition,
-        ),
+        listOf(givenPublishedBatteryLevelConfiguration()),
       ),
       deviceComplianceStore = complianceStore,
     )
@@ -182,9 +168,7 @@ class SynchroniseDeviceComplianceTest {
         ),
       ),
       ruleConfigurationStore =
-      FakeRuleConfigurationStore(
-        definitions = emptyList(),
-      ),
+      FakeRuleConfigurationStore(),
       deviceComplianceStore = complianceStore,
     )
 
@@ -214,9 +198,7 @@ class SynchroniseDeviceComplianceTest {
         devices = emptyList(),
       ),
       ruleConfigurationStore = FakeRuleConfigurationStore(
-        definitions = listOf(
-          BatteryLevelRuleV1.ruleDefinition,
-        ),
+        listOf(givenPublishedBatteryLevelConfiguration()),
       ),
       deviceComplianceStore = complianceStore,
     )
@@ -243,9 +225,7 @@ class SynchroniseDeviceComplianceTest {
         ),
       ),
       ruleConfigurationStore = FakeRuleConfigurationStore(
-        definitions = listOf(
-          BatteryLevelRuleV1.ruleDefinition,
-        ),
+        listOf(givenPublishedBatteryLevelConfiguration()),
       ),
       deviceComplianceStore =
       FakeDeviceComplianceStore(),
@@ -302,38 +282,6 @@ class SynchroniseDeviceComplianceTest {
       nonCompliant = 0,
       noData = 0,
       deactivated = 0,
-    )
-  }
-
-  private class FakeRuleConfigurationStore(
-    private val definitions: List<RuleDefinition<BatteryLevelRuleParameters>>,
-  ) : RuleConfigurationStore {
-
-    override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = definitions.map {
-      givenFakeRuleConfiguration(it)
-    }
-
-    override fun <P : RuleParameters> findPublished(
-      definition: RuleDefinition<P>,
-    ): RuleConfiguration<P>? = null
-
-    override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
-
-    private fun givenFakeRuleConfiguration(
-      definition: RuleDefinition<BatteryLevelRuleParameters>,
-    ): RuleConfiguration<BatteryLevelRuleParameters> = RuleConfiguration.rehydrate(
-      ruleDefinition = definition,
-      id = RuleConfigurationId(UUID.randomUUID()),
-      parameters = BatteryLevelRuleParameters(
-        threshold = BatteryPercentage(20),
-      ),
-      revision = RuleConfigurationRevision(1),
-      status = RuleConfigurationStatus.PUBLISHED,
-      createdAt = Instant.parse("2026-01-01T00:00:00Z"),
-      createdBy = "system",
-      publishedAt = Instant.parse("2026-01-01T00:00:00Z"),
-      publishedBy = "system",
-      effectiveFrom = Instant.parse("2026-01-01T00:00:00Z"),
     )
   }
 }

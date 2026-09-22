@@ -11,7 +11,15 @@ interface RuleConfigurationStore {
     definition: RuleDefinition<P>,
   ): RuleConfiguration<P>?
 
+  fun <P : RuleParameters> findDraft(
+    definition: RuleDefinition<P>,
+  ): RuleConfiguration<P>?
+
   fun findById(
     id: UUID,
   ): RuleConfiguration<out RuleParameters>?
+
+  fun save(
+    configuration: RuleConfiguration<out RuleParameters>,
+  ): RuleConfiguration<out RuleParameters>
 }

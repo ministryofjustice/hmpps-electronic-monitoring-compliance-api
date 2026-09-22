@@ -14,10 +14,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleVersion
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
@@ -25,6 +22,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.EventId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeRuleConfigurationStore
 import java.time.Instant
 import java.util.UUID
 
@@ -42,7 +40,7 @@ class EvaluateBatteryLevelEventTest {
     val useCase =
       EvaluateBatteryLevelEvent(
         ruleConfigurationStore =
-        FakeRuleConfigurationStore(configuration),
+        FakeRuleConfigurationStore(listOf(configuration)),
         deviceComplianceStore =
         FakeDeviceComplianceStore(),
       )
@@ -65,7 +63,7 @@ class EvaluateBatteryLevelEventTest {
     val configuration = givenPublishedConfiguration(threshold = 20)
 
     // And an existing non-compliant record for the device
-    val configurationStore = FakeRuleConfigurationStore(configuration)
+    val configurationStore = FakeRuleConfigurationStore(listOf(configuration))
     val complianceStore = FakeDeviceComplianceStore(givenExistingDeviceCompliance())
     val useCase = EvaluateBatteryLevelEvent(
       ruleConfigurationStore = configurationStore,
@@ -99,7 +97,7 @@ class EvaluateBatteryLevelEventTest {
   fun `it should fail if there is no published configuration`() {
     // Given no published configuration for the battery level rule
     val useCase = EvaluateBatteryLevelEvent(
-      ruleConfigurationStore = FakeRuleConfigurationStore(null),
+      ruleConfigurationStore = FakeRuleConfigurationStore(),
       deviceComplianceStore = FakeDeviceComplianceStore(),
     )
 
@@ -124,7 +122,7 @@ class EvaluateBatteryLevelEventTest {
     // And an existing non-compliance record for the device
     val complianceStore = FakeDeviceComplianceStore(givenExistingDeviceCompliance())
     val useCase = EvaluateBatteryLevelEvent(
-      ruleConfigurationStore = FakeRuleConfigurationStore(configuration),
+      ruleConfigurationStore = FakeRuleConfigurationStore(listOf(configuration)),
       deviceComplianceStore = complianceStore,
     )
 
@@ -227,20 +225,5 @@ class EvaluateBatteryLevelEventTest {
       noData = 0,
       deactivated = 0,
     )
-  }
-
-  private class FakeRuleConfigurationStore(
-    private val configuration: RuleConfiguration<BatteryLevelRuleParameters>? = null,
-  ) : RuleConfigurationStore {
-
-    override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = listOfNotNull(configuration)
-    override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <P : RuleParameters> findPublished(
-      definition: RuleDefinition<P>,
-    ): RuleConfiguration<P>? = configuration
-      ?.takeIf { it.ruleDefinition == definition }
-      as RuleConfiguration<P>?
   }
 }

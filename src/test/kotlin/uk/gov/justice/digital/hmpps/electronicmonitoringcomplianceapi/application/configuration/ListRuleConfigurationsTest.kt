@@ -7,12 +7,10 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeRuleConfigurationStore
 import java.time.Instant
 import java.util.UUID
 
@@ -34,13 +32,7 @@ class ListRuleConfigurationsTest {
       publishedBy = "user",
       effectiveFrom = Instant.parse("2026-09-02T10:00:00Z"),
     )
-    val store = object : RuleConfigurationStore {
-      override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = listOf(configuration)
-      override fun <P : RuleParameters> findPublished(
-        definition: RuleDefinition<P>,
-      ): RuleConfiguration<P>? = null
-      override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
-    }
+    val store = FakeRuleConfigurationStore(listOf(configuration))
 
     // When we list the rule configurations
     val useCase = ListRuleConfigurations(store)
@@ -63,13 +55,7 @@ class ListRuleConfigurationsTest {
   @Test
   fun `returns an empty list when there are no published configurations`() {
     // Given an empty store
-    val store = object : RuleConfigurationStore {
-      override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = emptyList()
-      override fun <P : RuleParameters> findPublished(
-        definition: RuleDefinition<P>,
-      ): RuleConfiguration<P>? = null
-      override fun findById(id: UUID): RuleConfiguration<out RuleParameters>? = null
-    }
+    val store = FakeRuleConfigurationStore()
 
     // When we list the rule configurations
     val useCase = ListRuleConfigurations(store)
