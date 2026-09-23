@@ -1,7 +1,10 @@
 package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.config
 
+import jakarta.persistence.EntityExistsException
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
 
@@ -36,6 +40,58 @@ class ElectronicMonitoringComplianceApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.info("No resource found exception: {}", e.message) }
+
+  @ExceptionHandler(EntityNotFoundException::class)
+  fun handleEntityNotFoundException(e: EntityNotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND,
+        userMessage = "Not Found",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Entity not found exception: {}", e.message) }
+
+  @ExceptionHandler(IllegalArgumentException::class)
+  fun handleIllegalArgumentException(
+    e: IllegalArgumentException,
+  ): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(
+      ErrorResponse(
+        status = BAD_REQUEST,
+        userMessage = "Bad Request",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Illegal argument exception: {}", e.message) }
+
+  @ExceptionHandler(
+    EntityExistsException::class,
+  )
+  fun handleEntityExistsException(
+    e: EntityExistsException,
+  ): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(HttpStatus.CONFLICT)
+    .body(
+      ErrorResponse(
+        status = HttpStatus.CONFLICT,
+        userMessage = "Conflict",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Entity exists exception: {}", e.message) }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+  fun handleMethodArgumentTypeMismatch(
+    exception: MethodArgumentTypeMismatchException,
+  ): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(
+      ErrorResponse(
+        status = BAD_REQUEST,
+        userMessage = "Invalid value '${exception.value}' for ${exception.name}",
+        developerMessage = exception.message,
+      ),
+    )
 
   @ExceptionHandler(AccessDeniedException::class)
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> = ResponseEntity

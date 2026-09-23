@@ -27,6 +27,15 @@ spring:
   web:
     error:
       include-message: always
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    url: 'jdbc:postgresql://${DB_SERVER}/${DB_NAME}?sslmode=prefer'
+    username: ${DB_USER}
+    password: ${DB_PASS}
+  flyway:
+    enabled: true
 
 server:
   port: 8080
@@ -63,3 +72,18 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+electronic-monitoring-datastore:
+  role-arn: ${DATASTORE_ROLE_ARN}
+  region: eu-west-2
+  session-name: ${DATASTORE_SESSION_NAME}
+  athena:
+    database: ${DATASTORE_ATHENA_DATABASE}
+    work-group: ${DATASTORE_ATHENA_WORKGROUP}
+    device-activations-table: ${DATASTORE_ATHENA_DEVICE_ACTIVATIONS_TABLE}
+    events-database: ${DATASTORE_ATHENA_EVENTS_DATABASE}
+    events-table: ${DATASTORE_ATHENA_EVENTS_TABLE}
+
+backfill:
+  battery-level:
+    enabled: ${BACKFILL_BATTERY_LEVEL:false}

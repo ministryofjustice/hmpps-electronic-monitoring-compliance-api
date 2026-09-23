@@ -1,0 +1,22 @@
+meta {
+  name: List device compliance
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/device-compliance
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isObject
+  res.body.summary: isObject
+  res.body.devices: isArray
+}
