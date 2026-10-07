@@ -21,14 +21,6 @@ class GetRuleConfiguration(
       ruleVersion = configuration.ruleDefinition.version,
     )
 
-    return RuleConfigurationResponse(
-      id = configuration.id.value,
-      ruleId = configuration.ruleDefinition.id.value,
-      ruleVersion = configuration.ruleDefinition.version.value,
-      revision = configuration.revision.value,
-      parameters = configuration.parameters,
-      status = configuration.status,
-      summary = complianceSummary,
-    )
+    return configuration.toResponse(complianceSummary)
   }
 }

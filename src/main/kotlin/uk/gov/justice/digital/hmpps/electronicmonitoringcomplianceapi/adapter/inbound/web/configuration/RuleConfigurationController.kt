@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.CreateRuleConfigurationDraft
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.GetRuleConfiguration
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.GetRuleConfigurationDraft
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.ListRuleConfigurations
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationRequest
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationResponse
@@ -21,6 +22,7 @@ import java.util.UUID
 class RuleConfigurationController(
   private val createRuleConfigurationDraft: CreateRuleConfigurationDraft,
   private val getRuleConfiguration: GetRuleConfiguration,
+  private val getRuleConfigurationDraft: GetRuleConfigurationDraft,
   private val listRuleConfigurations: ListRuleConfigurations,
 ) {
   @GetMapping("/{ruleConfigurationId}")
@@ -28,6 +30,12 @@ class RuleConfigurationController(
     @PathVariable("ruleConfigurationId")
     ruleConfigurationId: UUID,
   ): RuleConfigurationResponse = getRuleConfiguration.get(ruleConfigurationId)
+
+  @GetMapping("/{ruleConfigurationId}/draft")
+  fun getRuleConfigurationDraft(
+    @PathVariable("ruleConfigurationId")
+    ruleConfigurationId: UUID,
+  ): RuleConfigurationResponse = getRuleConfigurationDraft.get(ruleConfigurationId)
 
   @PostMapping("/{ruleConfigurationId}/draft")
   fun createRuleConfigurationDraft(

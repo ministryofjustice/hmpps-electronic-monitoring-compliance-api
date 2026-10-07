@@ -12,5 +12,5 @@ data class RuleConfigurationResponse(
   val revision: Int,
   val parameters: RuleParameters,
   val status: RuleConfigurationStatus,
-  val summary: DeviceRuleComplianceCounts,
+  val summary: DeviceRuleComplianceCounts?,
 )

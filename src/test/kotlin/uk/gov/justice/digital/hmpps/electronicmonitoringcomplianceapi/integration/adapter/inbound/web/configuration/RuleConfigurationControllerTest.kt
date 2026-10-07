@@ -210,6 +210,113 @@ class RuleConfigurationControllerTest : IntegrationTestBase() {
   }
 
   @Nested
+  @DisplayName("GET /v1/rule-configurations/{id}/draft")
+  inner class GetRuleConfigurationDraft {
+    @Test
+    fun `it should return a draft`() {
+      // Given a published rule config
+      val published =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.PUBLISHED,
+            threshold = 20,
+          ),
+        )
+
+      // And a draft rule config for the same rule
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 30,
+        ),
+      )
+
+      // When we call the endpoint, it should return the draft rule configuration
+      webTestClient
+        .get()
+        .uri("/v1/rule-configurations/${published.id}/draft")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(draft.id.toString())
+        .jsonPath("$.ruleId")
+        .isEqualTo("BATTERY_LEVEL")
+        .jsonPath("$.ruleVersion")
+        .isEqualTo(1)
+        .jsonPath("$.revision")
+        .isEqualTo(2)
+        .jsonPath("$.status")
+        .isEqualTo("DRAFT")
+        .jsonPath("$.parameters.threshold")
+        .isEqualTo(30)
+    }
+
+    @Test
+    fun `it should return not found when getting the draft for unknown rule configuration`() {
+      // Given a non-existent rule configuration id
+      val id = UUID.randomUUID()
+
+      // When we call the endpoint, it should return not found
+      webTestClient
+        .get()
+        .uri("/v1/rule-configurations/$id/draft")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return not found when no draft exists`() {
+      // Given a published rule config without a draft
+      val configuration =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.PUBLISHED,
+            threshold = 20,
+          ),
+        )
+
+      // When we call the endpoint, it should return not found
+      webTestClient
+        .get()
+        .uri("/v1/rule-configurations/${configuration.id}/draft")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return bad request when getting draft from a draft configuration`() {
+      // Given a draft rule config
+      val configuration =
+        repository.save(
+          ruleConfigurationEntity(
+            revision = 1,
+            status = RuleConfigurationStatus.DRAFT,
+            threshold = 20,
+          ),
+        )
+
+      // When we try to get the draft for a draft configuration, it should return bad request
+      webTestClient
+        .get()
+        .uri("/v1/rule-configurations/${configuration.id}/draft")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+  }
+
+  @Nested
   @DisplayName("POST /v1/rule-configurations/{id}/draft")
   inner class CreateRuleConfigurationDraft {
     @Test

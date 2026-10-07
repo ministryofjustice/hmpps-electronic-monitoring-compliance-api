@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicati
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
@@ -45,22 +44,7 @@ class CreateRuleConfigurationDraft(
       user = user,
     )
 
-    val saved = store.save(draft)
-
-    return RuleConfigurationResponse(
-      id = saved.id.value,
-      ruleId = saved.ruleDefinition.id.value,
-      ruleVersion = saved.ruleDefinition.version.value,
-      revision = saved.revision.value,
-      parameters = saved.parameters,
-      status = saved.status,
-      summary = DeviceRuleComplianceCounts(
-        compliant = 0,
-        nonCompliant = 0,
-        noData = 0,
-        deactivated = 0,
-      ),
-    )
+    return store.save(draft).toResponse()
   }
 
   private fun <P : RuleParameters> createDraft(
