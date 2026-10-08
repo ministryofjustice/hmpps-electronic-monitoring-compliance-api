@@ -35,6 +35,15 @@ class CreateRuleConfigurationDraft(
       "A draft can only be created from a published rule configuration"
     }
 
+    val current = store.findPublishedAt(
+      definition = source.ruleDefinition,
+      at = clock.instant(),
+    )
+
+    require(source.id == current?.id) {
+      "A draft can only be created from the current published rule configuration"
+    }
+
     if (store.findDraft(source.ruleDefinition) != null) {
       throw EntityExistsException(
         "A draft already exists for ${source.ruleDefinition.id.value} v${source.ruleDefinition.version.value}",

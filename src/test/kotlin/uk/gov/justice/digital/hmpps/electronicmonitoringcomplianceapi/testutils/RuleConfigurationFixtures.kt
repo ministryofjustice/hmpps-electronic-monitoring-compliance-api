@@ -27,6 +27,7 @@ object RuleConfigurationFixtures {
     threshold: Int = 20,
     revision: Int = 1,
     id: UUID = UUID.randomUUID(),
+    effectiveFrom: Instant = Instant.parse("2026-01-01T00:00:00Z"),
   ): RuleConfiguration<BatteryLevelRuleParameters> = RuleConfiguration.rehydrate(
     id = RuleConfigurationId(id),
     ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
@@ -39,6 +40,6 @@ object RuleConfigurationFixtures {
     createdBy = "system",
     publishedAt = Instant.parse("2026-01-01T00:00:00Z"),
     publishedBy = "system",
-    effectiveFrom = Instant.parse("2026-01-01T00:00:00Z"),
+    effectiveFrom = effectiveFrom,
   )
 }

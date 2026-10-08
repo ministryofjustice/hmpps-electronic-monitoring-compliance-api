@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.con
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
+import java.time.Instant
 import java.util.UUID
 
 class FakeRuleConfigurationStore(
@@ -17,18 +18,42 @@ class FakeRuleConfigurationStore(
       .associateBy { it.id.value }
       .toMutableMap()
 
-  override fun findPublished(): List<RuleConfiguration<out RuleParameters>> = configurations.values.filter {
-    it.status == RuleConfigurationStatus.PUBLISHED
-  }
+  override fun findCurrentPublished(): List<RuleConfiguration<out RuleParameters>> = configurations.values
+    .filter {
+      it.status == RuleConfigurationStatus.PUBLISHED &&
+        it.effectiveFrom != null
+    }
+    .groupBy {
+      it.ruleDefinition.id.value to it.ruleDefinition.version.value
+    }
+    .mapNotNull { (_, revisions) ->
+      revisions.maxWithOrNull(
+        compareBy<RuleConfiguration<out RuleParameters>> {
+          it.effectiveFrom
+        }.thenBy {
+          it.revision.value
+        },
+      )
+    }
 
   @Suppress("UNCHECKED_CAST")
-  override fun <P : RuleParameters> findPublished(
+  override fun <P : RuleParameters> findPublishedAt(
     definition: RuleDefinition<P>,
+    at: Instant,
   ): RuleConfiguration<P>? = configurations.values
-    .firstOrNull {
+    .filter {
       it.status == RuleConfigurationStatus.PUBLISHED &&
-        it.ruleDefinition == definition
-    } as RuleConfiguration<P>?
+        it.ruleDefinition == definition &&
+        it.effectiveFrom != null &&
+        !it.effectiveFrom!!.isAfter(at)
+    }
+    .maxWithOrNull(
+      compareBy<RuleConfiguration<out RuleParameters>> {
+        it.effectiveFrom
+      }.thenBy {
+        it.revision.value
+      },
+    ) as RuleConfiguration<P>?
 
   @Suppress("UNCHECKED_CAST")
   override fun <P : RuleParameters> findDraft(

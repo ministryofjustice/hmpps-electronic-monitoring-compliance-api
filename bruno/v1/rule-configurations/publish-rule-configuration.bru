@@ -1,0 +1,20 @@
+meta {
+  name: Publish rule configuration
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/v1/rule-configurations/{{ruleConfigurationId}}/publication
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq PUBLISHED
+}

@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicatio
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfigurationDraft
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.ListRuleConfigurations
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.PublishRuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.UpdateRuleConfigurationDraft
 import java.util.UUID
 
@@ -26,6 +27,7 @@ class RuleConfigurationController(
   private val getRuleConfiguration: GetRuleConfiguration,
   private val getRuleConfigurationDraft: GetRuleConfigurationDraft,
   private val listRuleConfigurations: ListRuleConfigurations,
+  private val publishRuleConfiguration: PublishRuleConfiguration,
   private val updateRuleConfigurationDraft: UpdateRuleConfigurationDraft,
 ) {
   @GetMapping("/{ruleConfigurationId}")
@@ -56,6 +58,16 @@ class RuleConfigurationController(
 
   @GetMapping
   fun listRuleConfigurations(): List<RuleConfigurationSummary> = listRuleConfigurations.list()
+
+  @PutMapping("/{ruleConfigurationId}/publication")
+  fun publishRuleConfiguration(
+    @PathVariable("ruleConfigurationId")
+    ruleConfigurationId: UUID,
+    authentication: Authentication,
+  ): RuleConfigurationResponse = publishRuleConfiguration.publish(
+    ruleConfigurationId,
+    authentication.name,
+  )
 
   @PutMapping("/{ruleConfigurationId}")
   fun updateRuleConfigurationDraft(

@@ -14,8 +14,9 @@ class EvaluateBatteryLevelEvent(
   private val rule = BatteryLevelRuleV1()
 
   fun evaluate(event: BatteryLevelReported) {
-    val configuration = ruleConfigurationStore.findPublished(
+    val configuration = ruleConfigurationStore.findPublishedAt(
       rule.definition,
+      event.recordedAt,
     ) ?: throw IllegalStateException(
       "No published configuration for ${rule.definition.id.value} v${rule.definition.version.value}",
     )

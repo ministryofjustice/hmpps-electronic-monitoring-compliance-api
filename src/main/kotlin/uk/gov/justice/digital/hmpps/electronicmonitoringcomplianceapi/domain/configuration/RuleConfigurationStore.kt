@@ -2,13 +2,15 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.co
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleDefinition
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
+import java.time.Instant
 import java.util.UUID
 
 interface RuleConfigurationStore {
-  fun findPublished(): List<RuleConfiguration<out RuleParameters>>
+  fun findCurrentPublished(): List<RuleConfiguration<out RuleParameters>>
 
-  fun <P : RuleParameters> findPublished(
+  fun <P : RuleParameters> findPublishedAt(
     definition: RuleDefinition<P>,
+    at: Instant,
   ): RuleConfiguration<P>?
 
   fun <P : RuleParameters> findDraft(

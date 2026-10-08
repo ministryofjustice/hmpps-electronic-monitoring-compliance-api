@@ -665,6 +665,159 @@ class RuleConfigurationControllerTest : IntegrationTestBase() {
     }
   }
 
+  @Nested
+  @DisplayName("PUT /v1/rule-configurations/{id}/publication")
+  inner class PublishRuleConfiguration {
+
+    @Test
+    fun `it should publish an existing draft`() {
+      // Given an existing draft
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 50,
+        ),
+      )
+
+      val countBefore = repository.count()
+
+      // When we publish the draft
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${draft.id}/publication")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(draft.id.toString())
+        .jsonPath("$.ruleId")
+        .isEqualTo("BATTERY_LEVEL")
+        .jsonPath("$.ruleVersion")
+        .isEqualTo(1)
+        .jsonPath("$.revision")
+        .isEqualTo(2)
+        .jsonPath("$.status")
+        .isEqualTo("PUBLISHED")
+        .jsonPath("$.parameters.threshold")
+        .isEqualTo(50)
+
+      // Then the existing row should be published
+      val saved = repository.findById(draft.id).orElseThrow()
+
+      assertThat(saved.status).isEqualTo(RuleConfigurationStatus.PUBLISHED)
+      assertThat(saved.publishedAt).isNotNull()
+      assertThat(saved.publishedBy).isNotBlank()
+      assertThat(saved.effectiveFrom).isEqualTo(saved.publishedAt)
+
+      // And no additional configuration should be created
+      assertThat(repository.count()).isEqualTo(countBefore)
+    }
+
+    @Test
+    fun `it should preserve the previous published revision`() {
+      // Given an existing published revision
+      val published = repository.save(
+        ruleConfigurationEntity(
+          revision = 1,
+          status = RuleConfigurationStatus.PUBLISHED,
+          threshold = 20,
+        ),
+      )
+
+      val previousEffectiveFrom = published.effectiveFrom
+      val previousPublishedAt = published.publishedAt
+
+      // And a draft of the next revision
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 50,
+        ),
+      )
+
+      // When we publish the draft
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${draft.id}/publication")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isOk
+
+      // Then both revisions should remain published
+      val previous = repository.findById(published.id).orElseThrow()
+      val current = repository.findById(draft.id).orElseThrow()
+
+      assertThat(previous.status).isEqualTo(RuleConfigurationStatus.PUBLISHED)
+      assertThat(previous.effectiveFrom).isEqualTo(previousEffectiveFrom)
+      assertThat(previous.publishedAt).isEqualTo(previousPublishedAt)
+      assertThat(previous.parameters["threshold"]).isEqualTo(20)
+
+      assertThat(current.status).isEqualTo(RuleConfigurationStatus.PUBLISHED)
+      assertThat(current.parameters["threshold"]).isEqualTo(50)
+      assertThat(current.effectiveFrom).isAfter(previous.effectiveFrom)
+    }
+
+    @Test
+    fun `it should return not found when the configuration does not exist`() {
+      // Given an unknown configuration ID
+      val id = UUID.randomUUID()
+
+      // When we attempt to publish it
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/$id/publication")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return an error when the configuration is already published`() {
+      // Given an already published configuration
+      val published = repository.save(
+        ruleConfigurationEntity(
+          revision = 1,
+          status = RuleConfigurationStatus.PUBLISHED,
+          threshold = 20,
+        ),
+      )
+
+      val originalPublishedAt = published.publishedAt
+
+      // When we attempt to publish it again
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${published.id}/publication")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isEqualTo(500)
+
+      // Then its publication metadata should remain unchanged
+      val saved = repository.findById(published.id).orElseThrow()
+
+      assertThat(saved.status).isEqualTo(RuleConfigurationStatus.PUBLISHED)
+      assertThat(saved.publishedAt).isEqualTo(originalPublishedAt)
+    }
+
+    @Test
+    fun `it should return bad request for an invalid configuration ID`() {
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/not-a-uuid/publication")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+  }
+
   private fun ruleConfigurationEntity(
     id: UUID = UUID.randomUUID(),
     revision: Int,

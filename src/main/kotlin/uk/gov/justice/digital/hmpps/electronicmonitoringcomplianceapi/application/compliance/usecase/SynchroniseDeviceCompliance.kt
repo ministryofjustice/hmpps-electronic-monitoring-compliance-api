@@ -17,7 +17,7 @@ class SynchroniseDeviceCompliance(
   fun synchronise(): Int {
     val ruleDefinitions =
       ruleConfigurationStore
-        .findPublished()
+        .findCurrentPublished()
         .map { it.ruleDefinition }
 
     val existing =

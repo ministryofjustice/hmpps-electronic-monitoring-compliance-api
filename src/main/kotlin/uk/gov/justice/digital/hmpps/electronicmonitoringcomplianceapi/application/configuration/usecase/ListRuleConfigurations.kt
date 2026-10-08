@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 class ListRuleConfigurations(
   private val store: RuleConfigurationStore,
 ) {
-  fun list(): List<RuleConfigurationSummary> = store.findPublished().map {
+  fun list(): List<RuleConfigurationSummary> = store.findCurrentPublished().map {
     RuleConfigurationSummary(
       id = it.id.value,
       ruleId = it.ruleDefinition.id.value,
