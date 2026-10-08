@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.tel
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.ElectronicMonitoringDataStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeRuleConfigurationStore
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.RuleComplianceFixtures.givenPublishedBatteryLevelConfiguration
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.RuleConfigurationFixtures.givenPublishedBatteryLevelConfiguration
 import java.util.UUID
 
 class SynchroniseDeviceComplianceTest {
