@@ -5,7 +5,7 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.SynchroniseDeviceCompliance
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.SynchroniseDeviceCompliance
 import kotlin.system.exitProcess
 
 @Component

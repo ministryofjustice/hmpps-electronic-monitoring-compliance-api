@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicati
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.SynchroniseDeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
@@ -35,11 +36,11 @@ class SynchroniseDeviceComplianceTest {
     val complianceStore = FakeDeviceComplianceStore()
 
     val useCase = SynchroniseDeviceCompliance(
-      datastore = datastore,
-      ruleConfigurationStore = FakeRuleConfigurationStore(
-        listOf(givenPublishedBatteryLevelConfiguration()),
-      ),
-      deviceComplianceStore = complianceStore,
+        datastore = datastore,
+        ruleConfigurationStore = FakeRuleConfigurationStore(
+            listOf(givenPublishedBatteryLevelConfiguration()),
+        ),
+        deviceComplianceStore = complianceStore,
     )
 
     val count = useCase.synchronise()
@@ -87,11 +88,11 @@ class SynchroniseDeviceComplianceTest {
       FakeDeviceComplianceStore(existing = listOf(existing))
 
     val useCase = SynchroniseDeviceCompliance(
-      datastore = datastore,
-      ruleConfigurationStore = FakeRuleConfigurationStore(
-        listOf(givenPublishedBatteryLevelConfiguration()),
-      ),
-      deviceComplianceStore = complianceStore,
+        datastore = datastore,
+        ruleConfigurationStore = FakeRuleConfigurationStore(
+            listOf(givenPublishedBatteryLevelConfiguration()),
+        ),
+        deviceComplianceStore = complianceStore,
     )
 
     useCase.synchronise()
@@ -120,18 +121,18 @@ class SynchroniseDeviceComplianceTest {
       FakeDeviceComplianceStore(existing = listOf(existing))
 
     val useCase = SynchroniseDeviceCompliance(
-      datastore = FakeElectronicMonitoringDataStore(
-        devices = listOf(
-          Device(
-            id = DeviceId(123),
-            status = DeviceStatus.ACTIVATED,
-          ),
+        datastore = FakeElectronicMonitoringDataStore(
+            devices = listOf(
+                Device(
+                    id = DeviceId(123),
+                    status = DeviceStatus.ACTIVATED,
+                ),
+            ),
         ),
-      ),
-      ruleConfigurationStore = FakeRuleConfigurationStore(
-        listOf(givenPublishedBatteryLevelConfiguration()),
-      ),
-      deviceComplianceStore = complianceStore,
+        ruleConfigurationStore = FakeRuleConfigurationStore(
+            listOf(givenPublishedBatteryLevelConfiguration()),
+        ),
+        deviceComplianceStore = complianceStore,
     )
 
     useCase.synchronise()
@@ -159,17 +160,17 @@ class SynchroniseDeviceComplianceTest {
       FakeDeviceComplianceStore(existing = listOf(existing))
 
     val useCase = SynchroniseDeviceCompliance(
-      datastore = FakeElectronicMonitoringDataStore(
-        devices = listOf(
-          Device(
-            id = DeviceId(123),
-            status = DeviceStatus.ACTIVATED,
-          ),
+        datastore = FakeElectronicMonitoringDataStore(
+            devices = listOf(
+                Device(
+                    id = DeviceId(123),
+                    status = DeviceStatus.ACTIVATED,
+                ),
+            ),
         ),
-      ),
-      ruleConfigurationStore =
-      FakeRuleConfigurationStore(),
-      deviceComplianceStore = complianceStore,
+        ruleConfigurationStore =
+            FakeRuleConfigurationStore(),
+        deviceComplianceStore = complianceStore,
     )
 
     useCase.synchronise()
@@ -194,13 +195,13 @@ class SynchroniseDeviceComplianceTest {
       FakeDeviceComplianceStore(existing = listOf(existing))
 
     val useCase = SynchroniseDeviceCompliance(
-      datastore = FakeElectronicMonitoringDataStore(
-        devices = emptyList(),
-      ),
-      ruleConfigurationStore = FakeRuleConfigurationStore(
-        listOf(givenPublishedBatteryLevelConfiguration()),
-      ),
-      deviceComplianceStore = complianceStore,
+        datastore = FakeElectronicMonitoringDataStore(
+            devices = emptyList(),
+        ),
+        ruleConfigurationStore = FakeRuleConfigurationStore(
+            listOf(givenPublishedBatteryLevelConfiguration()),
+        ),
+        deviceComplianceStore = complianceStore,
     )
 
     val count = useCase.synchronise()
@@ -212,23 +213,23 @@ class SynchroniseDeviceComplianceTest {
   @Test
   fun `it should synchronise every device returned by datastore`() {
     val useCase = SynchroniseDeviceCompliance(
-      datastore = FakeElectronicMonitoringDataStore(
-        devices = listOf(
-          Device(
-            id = DeviceId(123),
-            status = DeviceStatus.ACTIVATED,
-          ),
-          Device(
-            id = DeviceId(456),
-            status = DeviceStatus.DEACTIVATED,
-          ),
+        datastore = FakeElectronicMonitoringDataStore(
+            devices = listOf(
+                Device(
+                    id = DeviceId(123),
+                    status = DeviceStatus.ACTIVATED,
+                ),
+                Device(
+                    id = DeviceId(456),
+                    status = DeviceStatus.DEACTIVATED,
+                ),
+            ),
         ),
-      ),
-      ruleConfigurationStore = FakeRuleConfigurationStore(
-        listOf(givenPublishedBatteryLevelConfiguration()),
-      ),
-      deviceComplianceStore =
-      FakeDeviceComplianceStore(),
+        ruleConfigurationStore = FakeRuleConfigurationStore(
+            listOf(givenPublishedBatteryLevelConfiguration()),
+        ),
+        deviceComplianceStore =
+            FakeDeviceComplianceStore(),
     )
 
     val count = useCase.synchronise()

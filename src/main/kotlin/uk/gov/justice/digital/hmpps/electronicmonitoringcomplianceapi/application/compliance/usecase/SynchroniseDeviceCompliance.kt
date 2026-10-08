@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -9,9 +9,9 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.tel
 
 @Service
 class SynchroniseDeviceCompliance(
-  private val datastore: ElectronicMonitoringDataStore,
-  private val ruleConfigurationStore: RuleConfigurationStore,
-  private val deviceComplianceStore: DeviceComplianceStore,
+    private val datastore: ElectronicMonitoringDataStore,
+    private val ruleConfigurationStore: RuleConfigurationStore,
+    private val deviceComplianceStore: DeviceComplianceStore,
 ) {
 
   fun synchronise(): Int {
@@ -32,7 +32,7 @@ class SynchroniseDeviceCompliance(
 
       if (compliance == null) {
         deviceComplianceStore.save(
-          DeviceCompliance.create(
+          DeviceCompliance.Companion.create(
             deviceId = device.id,
             status = device.status,
             ruleDefinitions = ruleDefinitions,

@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicati
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceCounts
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.ListDeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
@@ -62,13 +64,13 @@ class ListDeviceComplianceTest {
     )
 
     val useCase = ListDeviceCompliance(
-      store = FakeDeviceComplianceStore(
-        listOf(
-          compliant,
-          nonCompliant,
-          deactivated,
+        store = FakeDeviceComplianceStore(
+            listOf(
+                compliant,
+                nonCompliant,
+                deactivated,
+            ),
         ),
-      ),
     )
 
     // When device compliance is listed
@@ -112,7 +114,7 @@ class ListDeviceComplianceTest {
   fun `it should return empty summary when there are no devices`() {
     // Given no device compliance records in the store
     val useCase = ListDeviceCompliance(
-      store = FakeDeviceComplianceStore(),
+        store = FakeDeviceComplianceStore(),
     )
 
     // When device compliance is listed

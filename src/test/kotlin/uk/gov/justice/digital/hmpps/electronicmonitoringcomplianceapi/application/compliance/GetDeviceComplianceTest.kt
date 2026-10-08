@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.GetDeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
@@ -48,9 +49,9 @@ class GetDeviceComplianceTest {
     )
 
     val useCase = GetDeviceCompliance(
-      store = FakeDeviceComplianceStore(
-        compliance,
-      ),
+        store = FakeDeviceComplianceStore(
+            compliance,
+        ),
     )
 
     // When we get the device compliance
@@ -88,7 +89,7 @@ class GetDeviceComplianceTest {
     val id = UUID.randomUUID()
 
     val useCase = GetDeviceCompliance(
-      store = FakeDeviceComplianceStore(),
+        store = FakeDeviceComplianceStore(),
     )
 
     // When we get the device compliance, then it should throw an exception
