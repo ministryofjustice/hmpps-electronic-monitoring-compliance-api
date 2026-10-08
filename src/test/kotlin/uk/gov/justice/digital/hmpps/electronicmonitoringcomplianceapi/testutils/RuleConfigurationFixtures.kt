@@ -10,7 +10,19 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import java.time.Instant
 import java.util.UUID
 
-object RuleComplianceFixtures {
+object RuleConfigurationFixtures {
+  fun givenDraftBatteryLevelConfiguration(
+    threshold: Int = 20,
+  ): RuleConfiguration<BatteryLevelRuleParameters> = RuleConfiguration.createDraft(
+    ruleDefinition = BatteryLevelRuleV1.ruleDefinition,
+    revision = RuleConfigurationRevision(2),
+    parameters = BatteryLevelRuleParameters(
+      threshold = BatteryPercentage(threshold),
+    ),
+    createdAt = Instant.parse("2026-10-08T09:00:00Z"),
+    createdBy = "test-user",
+  )
+
   fun givenPublishedBatteryLevelConfiguration(
     threshold: Int = 20,
     revision: Int = 1,

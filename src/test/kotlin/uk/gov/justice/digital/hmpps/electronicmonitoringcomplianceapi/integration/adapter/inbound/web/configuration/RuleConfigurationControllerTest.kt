@@ -472,6 +472,199 @@ class RuleConfigurationControllerTest : IntegrationTestBase() {
     }
   }
 
+  @Nested
+  @DisplayName("PUT /v1/rule-configurations/{id}")
+  inner class UpdateRuleConfigurationDraft {
+
+    @Test
+    fun `it should update an existing draft`() {
+      // Given an existing draft
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 20,
+        ),
+      )
+
+      // When we update the draft
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${draft.id}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+          {
+            "parameters": {
+              "threshold": 50
+            }
+          }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(draft.id.toString())
+        .jsonPath("$.ruleId")
+        .isEqualTo("BATTERY_LEVEL")
+        .jsonPath("$.ruleVersion")
+        .isEqualTo(1)
+        .jsonPath("$.revision")
+        .isEqualTo(2)
+        .jsonPath("$.status")
+        .isEqualTo("DRAFT")
+        .jsonPath("$.parameters.threshold")
+        .isEqualTo(50)
+
+      // Then the existing row should be updated
+      val saved = repository.findById(draft.id).orElseThrow()
+
+      assertThat(saved.parameters["threshold"]).isEqualTo(50)
+      assertThat(saved.revision).isEqualTo(2)
+      assertThat(saved.status).isEqualTo(RuleConfigurationStatus.DRAFT)
+      assertThat(saved.createdAt).isEqualTo(draft.createdAt)
+      assertThat(saved.createdBy).isEqualTo(draft.createdBy)
+    }
+
+    @Test
+    fun `it should return not found when the configuration does not exist`() {
+      // Given a non-existent configuration
+      val id = UUID.randomUUID()
+
+      // When we attempt to update it
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/$id")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+          {
+            "parameters": {
+              "threshold": 50
+            }
+          }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `it should return error when updating a published configuration`() {
+      // Given a published configuration
+      val published = repository.save(
+        ruleConfigurationEntity(
+          revision = 1,
+          status = RuleConfigurationStatus.PUBLISHED,
+          threshold = 20,
+        ),
+      )
+
+      // When we attempt to update it
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${published.id}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+          {
+            "parameters": {
+              "threshold": 50
+            }
+          }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isEqualTo(500)
+
+      // Then the published configuration should remain unchanged
+      val saved = repository.findById(published.id).orElseThrow()
+
+      assertThat(saved.parameters["threshold"]).isEqualTo(20)
+    }
+
+    @Test
+    fun `it should return bad request when parameters are invalid`() {
+      // Given an existing draft
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 20,
+        ),
+      )
+
+      // When we submit invalid parameters
+      webTestClient
+        .put()
+        .uri("/v1/rule-configurations/${draft.id}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .headers(setAuthorisation())
+        .bodyValue(
+          """
+          {
+            "parameters": {}
+          }
+          """.trimIndent(),
+        )
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // Then the original parameters should remain unchanged
+      val saved = repository.findById(draft.id).orElseThrow()
+
+      assertThat(saved.parameters["threshold"]).isEqualTo(20)
+    }
+
+    @Test
+    fun `it should update the same draft more than once`() {
+      // Given an existing draft
+      val draft = repository.save(
+        ruleConfigurationEntity(
+          revision = 2,
+          status = RuleConfigurationStatus.DRAFT,
+          threshold = 20,
+        ),
+      )
+
+      // When we update the draft twice
+      listOf(40, 50).forEach { threshold ->
+        webTestClient
+          .put()
+          .uri("/v1/rule-configurations/${draft.id}")
+          .contentType(MediaType.APPLICATION_JSON)
+          .headers(setAuthorisation())
+          .bodyValue(
+            """
+            {
+              "parameters": {
+                "threshold": $threshold
+              }
+            }
+            """.trimIndent(),
+          )
+          .exchange()
+          .expectStatus()
+          .isOk
+      }
+
+      // Then the same draft should contain the latest parameters
+      val saved = repository.findById(draft.id).orElseThrow()
+
+      assertThat(saved.parameters["threshold"]).isEqualTo(50)
+      assertThat(saved.revision).isEqualTo(2)
+      assertThat(saved.status).isEqualTo(RuleConfigurationStatus.DRAFT)
+    }
+  }
+
   private fun ruleConfigurationEntity(
     id: UUID = UUID.randomUUID(),
     revision: Int,

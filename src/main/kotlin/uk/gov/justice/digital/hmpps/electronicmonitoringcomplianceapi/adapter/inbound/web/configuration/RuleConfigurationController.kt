@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -15,6 +16,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicatio
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfigurationDraft
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.ListRuleConfigurations
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.UpdateRuleConfigurationDraft
 import java.util.UUID
 
 @RestController
@@ -24,6 +26,7 @@ class RuleConfigurationController(
   private val getRuleConfiguration: GetRuleConfiguration,
   private val getRuleConfigurationDraft: GetRuleConfigurationDraft,
   private val listRuleConfigurations: ListRuleConfigurations,
+  private val updateRuleConfigurationDraft: UpdateRuleConfigurationDraft,
 ) {
   @GetMapping("/{ruleConfigurationId}")
   fun getRuleConfiguration(
@@ -53,4 +56,14 @@ class RuleConfigurationController(
 
   @GetMapping
   fun listRuleConfigurations(): List<RuleConfigurationSummary> = listRuleConfigurations.list()
+
+  @PutMapping("/{ruleConfigurationId}")
+  fun updateRuleConfigurationDraft(
+    @PathVariable("ruleConfigurationId")
+    ruleConfigurationId: UUID,
+    @RequestBody request: RuleConfigurationRequest,
+  ): RuleConfigurationResponse = updateRuleConfigurationDraft.update(
+    ruleConfigurationId,
+    request,
+  )
 }
