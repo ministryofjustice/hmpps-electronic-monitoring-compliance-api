@@ -9,18 +9,18 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.com
 
 @Service
 class ListDeviceCompliance(
-    private val store: DeviceComplianceStore,
+  private val store: DeviceComplianceStore,
 ) {
   fun list(): DeviceComplianceList {
     val devices = store.findAllSummaries()
 
     return DeviceComplianceList(
-        summary = DeviceComplianceCounts(
-            compliant = devices.count { it.state == ComplianceState.COMPLIANT },
-            nonCompliant = devices.count { it.state == ComplianceState.NON_COMPLIANT },
-            deactivated = devices.count { it.status == DeviceStatus.DEACTIVATED },
-        ),
-        devices = devices,
+      summary = DeviceComplianceCounts(
+        compliant = devices.count { it.state == ComplianceState.COMPLIANT },
+        nonCompliant = devices.count { it.state == ComplianceState.NON_COMPLIANT },
+        deactivated = devices.count { it.status == DeviceStatus.DEACTIVATED },
+      ),
+      devices = devices,
     )
   }
 }

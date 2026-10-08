@@ -25,8 +25,8 @@ class GetRuleConfigurationTest {
     val complianceStore = FakeDeviceComplianceStore()
 
     val useCase = GetRuleConfiguration(
-        store = configurationStore,
-        complianceStore = complianceStore,
+      store = configurationStore,
+      complianceStore = complianceStore,
     )
 
     // When we get the rule configuration by ID
@@ -61,8 +61,8 @@ class GetRuleConfigurationTest {
     val id = UUID.randomUUID()
 
     val useCase = GetRuleConfiguration(
-        store = FakeRuleConfigurationStore(),
-        complianceStore = FakeDeviceComplianceStore(),
+      store = FakeRuleConfigurationStore(),
+      complianceStore = FakeDeviceComplianceStore(),
     )
 
     // When we get the rule configuration, it should throw an EntityNotFoundException

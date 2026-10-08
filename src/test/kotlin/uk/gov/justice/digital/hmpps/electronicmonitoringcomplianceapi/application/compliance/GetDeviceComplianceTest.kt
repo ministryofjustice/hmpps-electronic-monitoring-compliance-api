@@ -49,9 +49,9 @@ class GetDeviceComplianceTest {
     )
 
     val useCase = GetDeviceCompliance(
-        store = FakeDeviceComplianceStore(
-            compliance,
-        ),
+      store = FakeDeviceComplianceStore(
+        compliance,
+      ),
     )
 
     // When we get the device compliance
@@ -89,7 +89,7 @@ class GetDeviceComplianceTest {
     val id = UUID.randomUUID()
 
     val useCase = GetDeviceCompliance(
-        store = FakeDeviceComplianceStore(),
+      store = FakeDeviceComplianceStore(),
     )
 
     // When we get the device compliance, then it should throw an exception

@@ -9,16 +9,16 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 
 @Service
 class ListRuleConfigurations(
-    private val store: RuleConfigurationStore,
+  private val store: RuleConfigurationStore,
 ) {
   fun list(): List<RuleConfigurationSummary> = store.findPublished().map {
-      RuleConfigurationSummary(
-          id = it.id.value,
-          ruleId = it.ruleDefinition.id.value,
-          ruleVersion = it.ruleDefinition.version.value,
-          revision = it.revision.value,
-          parameters = it.parameters.toSummary(),
-      )
+    RuleConfigurationSummary(
+      id = it.id.value,
+      ruleId = it.ruleDefinition.id.value,
+      ruleVersion = it.ruleDefinition.version.value,
+      revision = it.revision.value,
+      parameters = it.parameters.toSummary(),
+    )
   }
 
   private fun RuleParameters.toSummary(): RuleConfigurationParametersSummary = when (this) {

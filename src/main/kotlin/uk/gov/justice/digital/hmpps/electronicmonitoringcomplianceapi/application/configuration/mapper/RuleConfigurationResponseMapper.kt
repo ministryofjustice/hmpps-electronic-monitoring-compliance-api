@@ -8,11 +8,11 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 fun RuleConfiguration<out RuleParameters>.toResponse(
   summary: DeviceRuleComplianceCounts? = null,
 ): RuleConfigurationResponse = RuleConfigurationResponse(
-    id = id.value,
-    ruleId = ruleDefinition.id.value,
-    ruleVersion = ruleDefinition.version.value,
-    revision = revision.value,
-    parameters = parameters,
-    status = status,
-    summary = summary,
+  id = id.value,
+  ruleId = ruleDefinition.id.value,
+  ruleVersion = ruleDefinition.version.value,
+  revision = revision.value,
+  parameters = parameters,
+  status = status,
+  summary = summary,
 )

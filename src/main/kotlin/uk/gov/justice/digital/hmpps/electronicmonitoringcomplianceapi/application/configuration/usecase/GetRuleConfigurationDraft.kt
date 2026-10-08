@@ -10,14 +10,14 @@ import java.util.UUID
 
 @Service
 class GetRuleConfigurationDraft(
-    private val store: RuleConfigurationStore,
+  private val store: RuleConfigurationStore,
 ) {
   fun get(
-      sourceId: UUID,
+    sourceId: UUID,
   ): RuleConfigurationResponse {
     val source = store.findById(sourceId)
       ?: throw EntityNotFoundException(
-          "Rule configuration with id $sourceId not found",
+        "Rule configuration with id $sourceId not found",
       )
 
     require(source.status == RuleConfigurationStatus.PUBLISHED) {
@@ -27,7 +27,7 @@ class GetRuleConfigurationDraft(
     val draft = store.findDraft(
       source.ruleDefinition,
     ) ?: throw EntityNotFoundException(
-        "No draft rule configuration exists for ${source.ruleDefinition.id.value} v${source.ruleDefinition.version.value}",
+      "No draft rule configuration exists for ${source.ruleDefinition.id.value} v${source.ruleDefinition.version.value}",
     )
 
     return draft.toResponse()

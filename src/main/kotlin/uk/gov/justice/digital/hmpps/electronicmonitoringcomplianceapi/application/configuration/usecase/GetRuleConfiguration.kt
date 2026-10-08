@@ -10,12 +10,12 @@ import java.util.UUID
 
 @Service
 class GetRuleConfiguration(
-    private val store: RuleConfigurationStore,
-    private val complianceStore: DeviceComplianceStore,
+  private val store: RuleConfigurationStore,
+  private val complianceStore: DeviceComplianceStore,
 ) {
   fun get(id: UUID): RuleConfigurationResponse {
     val configuration = store.findById(id) ?: throw EntityNotFoundException(
-        "Rule configuration not found: $id",
+      "Rule configuration not found: $id",
     )
 
     val complianceSummary = complianceStore.getRuleComplianceSummary(
