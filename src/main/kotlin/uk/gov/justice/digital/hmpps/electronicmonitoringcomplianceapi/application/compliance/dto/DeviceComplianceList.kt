@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceSummary
 

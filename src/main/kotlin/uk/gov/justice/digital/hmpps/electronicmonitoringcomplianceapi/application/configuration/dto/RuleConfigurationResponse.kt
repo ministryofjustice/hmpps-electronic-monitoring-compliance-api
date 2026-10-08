@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus

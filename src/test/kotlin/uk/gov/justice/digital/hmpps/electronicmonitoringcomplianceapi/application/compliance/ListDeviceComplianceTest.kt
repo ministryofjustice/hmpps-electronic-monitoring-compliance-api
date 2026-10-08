@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.applicati
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceCounts
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.ListDeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceCompliance
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore

@@ -4,10 +4,10 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.DeviceComplianceList
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.DeviceComplianceResponse
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.GetDeviceCompliance
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.ListDeviceCompliance
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceList
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.GetDeviceCompliance
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase.ListDeviceCompliance
 import java.util.UUID
 
 @RestController

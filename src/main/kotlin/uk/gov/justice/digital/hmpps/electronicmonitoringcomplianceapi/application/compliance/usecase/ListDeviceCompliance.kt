@@ -1,6 +1,8 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase
 
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceCounts
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceList
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.ComplianceState
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceStatus

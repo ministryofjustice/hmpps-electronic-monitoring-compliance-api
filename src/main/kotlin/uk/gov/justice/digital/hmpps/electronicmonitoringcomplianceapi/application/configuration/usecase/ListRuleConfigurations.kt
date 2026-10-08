@@ -1,6 +1,8 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase
 
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationParametersSummary
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationSummary
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.RuleParameters
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleParameters

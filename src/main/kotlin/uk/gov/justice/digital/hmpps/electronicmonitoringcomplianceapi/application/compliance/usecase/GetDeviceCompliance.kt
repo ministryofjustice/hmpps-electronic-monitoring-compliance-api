@@ -1,7 +1,9 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.usecase
 
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.DeviceComplianceResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.compliance.dto.RuleComplianceResponse
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import java.util.UUID
 

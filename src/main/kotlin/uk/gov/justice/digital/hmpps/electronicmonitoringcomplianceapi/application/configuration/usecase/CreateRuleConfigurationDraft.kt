@@ -1,8 +1,11 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase
 
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationRequest
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.mapper.toResponse
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
@@ -51,7 +54,7 @@ class CreateRuleConfigurationDraft(
     source: RuleConfiguration<P>,
     request: RuleConfigurationRequest,
     user: String,
-  ): RuleConfiguration<P> = RuleConfiguration.createDraft(
+  ): RuleConfiguration<P> = RuleConfiguration.Companion.createDraft(
     ruleDefinition = source.ruleDefinition,
     revision = RuleConfigurationRevision(
       source.revision.value + 1,
