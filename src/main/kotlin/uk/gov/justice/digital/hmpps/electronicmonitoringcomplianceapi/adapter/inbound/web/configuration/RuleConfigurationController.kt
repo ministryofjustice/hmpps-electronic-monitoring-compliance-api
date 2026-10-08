@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.CreateRuleConfigurationDraft
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.GetRuleConfiguration
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.GetRuleConfigurationDraft
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.ListRuleConfigurations
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationRequest
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationResponse
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.RuleConfigurationSummary
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.CreateRuleConfigurationDraft
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfiguration
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfigurationDraft
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.ListRuleConfigurations
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationRequest
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationSummary
 import java.util.UUID
 
 @RestController

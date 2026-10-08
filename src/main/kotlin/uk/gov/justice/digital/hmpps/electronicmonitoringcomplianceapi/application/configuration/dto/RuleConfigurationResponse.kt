@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto
 
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
@@ -6,11 +6,11 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import java.util.UUID
 
 data class RuleConfigurationResponse(
-  val id: UUID,
-  val ruleId: String,
-  val ruleVersion: Int,
-  val revision: Int,
-  val parameters: RuleParameters,
-  val status: RuleConfigurationStatus,
-  val summary: DeviceRuleComplianceCounts?,
+    val id: UUID,
+    val ruleId: String,
+    val ruleVersion: Int,
+    val revision: Int,
+    val parameters: RuleParameters,
+    val status: RuleConfigurationStatus,
+    val summary: DeviceRuleComplianceCounts?,
 )

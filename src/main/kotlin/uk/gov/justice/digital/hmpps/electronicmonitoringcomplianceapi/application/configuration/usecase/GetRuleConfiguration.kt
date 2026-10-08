@@ -1,19 +1,21 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase
 
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.mapper.toResponse
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceComplianceStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStore
 import java.util.UUID
 
 @Service
 class GetRuleConfiguration(
-  private val store: RuleConfigurationStore,
-  private val complianceStore: DeviceComplianceStore,
+    private val store: RuleConfigurationStore,
+    private val complianceStore: DeviceComplianceStore,
 ) {
   fun get(id: UUID): RuleConfigurationResponse {
     val configuration = store.findById(id) ?: throw EntityNotFoundException(
-      "Rule configuration not found: $id",
+        "Rule configuration not found: $id",
     )
 
     val complianceSummary = complianceStore.getRuleComplianceSummary(

@@ -1,8 +1,11 @@
-package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration
+package uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase
 
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationRequest
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.dto.RuleConfigurationResponse
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.mapper.toResponse
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
@@ -14,18 +17,18 @@ import java.util.UUID
 
 @Service
 class CreateRuleConfigurationDraft(
-  private val store: RuleConfigurationStore,
-  private val ruleParameterParser: RuleParameterParser,
-  private val clock: Clock,
+    private val store: RuleConfigurationStore,
+    private val ruleParameterParser: RuleParameterParser,
+    private val clock: Clock,
 ) {
   fun create(
-    sourceId: UUID,
-    request: RuleConfigurationRequest,
-    user: String,
+      sourceId: UUID,
+      request: RuleConfigurationRequest,
+      user: String,
   ): RuleConfigurationResponse {
     val source = store.findById(sourceId)
       ?: throw EntityNotFoundException(
-        "Rule configuration with id $sourceId not found",
+          "Rule configuration with id $sourceId not found",
       )
 
     require(source.status == RuleConfigurationStatus.PUBLISHED) {
@@ -34,7 +37,7 @@ class CreateRuleConfigurationDraft(
 
     if (store.findDraft(source.ruleDefinition) != null) {
       throw EntityExistsException(
-        "A draft already exists for ${source.ruleDefinition.id.value} v${source.ruleDefinition.version.value}",
+          "A draft already exists for ${source.ruleDefinition.id.value} v${source.ruleDefinition.version.value}",
       )
     }
 
@@ -48,13 +51,13 @@ class CreateRuleConfigurationDraft(
   }
 
   private fun <P : RuleParameters> createDraft(
-    source: RuleConfiguration<P>,
-    request: RuleConfigurationRequest,
-    user: String,
-  ): RuleConfiguration<P> = RuleConfiguration.createDraft(
+      source: RuleConfiguration<P>,
+      request: RuleConfigurationRequest,
+      user: String,
+  ): RuleConfiguration<P> = RuleConfiguration.Companion.createDraft(
     ruleDefinition = source.ruleDefinition,
     revision = RuleConfigurationRevision(
-      source.revision.value + 1,
+        source.revision.value + 1,
     ),
     parameters = ruleParameterParser.parse(
       source.ruleDefinition,

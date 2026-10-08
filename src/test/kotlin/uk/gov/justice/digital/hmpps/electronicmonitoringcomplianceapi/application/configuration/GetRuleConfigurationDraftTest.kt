@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfigurationDraft
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationRevision
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
@@ -35,9 +36,9 @@ class GetRuleConfigurationDraftTest {
     )
 
     val useCase = GetRuleConfigurationDraft(
-      FakeRuleConfigurationStore(
-        listOf(published, draft),
-      ),
+        FakeRuleConfigurationStore(
+            listOf(published, draft),
+        ),
     )
 
     // When we get the draft for the published rule configuration
@@ -59,7 +60,7 @@ class GetRuleConfigurationDraftTest {
 
     // And a store with no rule configurations
     val useCase = GetRuleConfigurationDraft(
-      FakeRuleConfigurationStore(),
+        FakeRuleConfigurationStore(),
     )
 
     // When we try to get the draft, it should throw an EntityNotFoundException
@@ -80,9 +81,9 @@ class GetRuleConfigurationDraftTest {
 
     // And a store with only the published rule configuration
     val useCase = GetRuleConfigurationDraft(
-      FakeRuleConfigurationStore(
-        listOf(published),
-      ),
+        FakeRuleConfigurationStore(
+            listOf(published),
+        ),
     )
 
     // When we try to get the draft, it should throw an EntityNotFoundException
@@ -109,9 +110,9 @@ class GetRuleConfigurationDraftTest {
     )
 
     val useCase = GetRuleConfigurationDraft(
-      FakeRuleConfigurationStore(
-        listOf(draft),
-      ),
+        FakeRuleConfigurationStore(
+            listOf(draft),
+        ),
     )
 
     // When we try to get the draft for the draft rule configuration, it should throw an IllegalArgumentException

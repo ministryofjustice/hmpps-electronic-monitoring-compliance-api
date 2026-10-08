@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.configuration.usecase.GetRuleConfiguration
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.compliance.DeviceRuleComplianceCounts
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.configuration.RuleConfigurationStatus
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
@@ -24,8 +25,8 @@ class GetRuleConfigurationTest {
     val complianceStore = FakeDeviceComplianceStore()
 
     val useCase = GetRuleConfiguration(
-      store = configurationStore,
-      complianceStore = complianceStore,
+        store = configurationStore,
+        complianceStore = complianceStore,
     )
 
     // When we get the rule configuration by ID
@@ -60,8 +61,8 @@ class GetRuleConfigurationTest {
     val id = UUID.randomUUID()
 
     val useCase = GetRuleConfiguration(
-      store = FakeRuleConfigurationStore(),
-      complianceStore = FakeDeviceComplianceStore(),
+        store = FakeRuleConfigurationStore(),
+        complianceStore = FakeDeviceComplianceStore(),
     )
 
     // When we get the rule configuration, it should throw an EntityNotFoundException
