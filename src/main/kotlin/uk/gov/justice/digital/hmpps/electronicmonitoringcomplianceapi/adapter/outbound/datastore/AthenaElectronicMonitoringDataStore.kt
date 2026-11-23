@@ -9,7 +9,9 @@ import software.amazon.awssdk.services.athena.model.QueryExecutionState
 import software.amazon.awssdk.services.athena.model.Row
 import software.amazon.awssdk.services.athena.model.StartQueryExecutionRequest
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.datastore.mapper.AthenaBatteryLevelEventMapper
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.datastore.mapper.AthenaDeviceActivationMapper
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.adapter.outbound.datastore.mapper.AthenaDeviceMapper
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.activation.DeviceActivation
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.Device
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.ElectronicMonitoringDataStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
@@ -20,6 +22,7 @@ class AthenaElectronicMonitoringDataStore(
   private val properties: ElectronicMonitoringDataStoreProperties,
   private val batteryLevelEventMapper: AthenaBatteryLevelEventMapper,
   private val deviceMapper: AthenaDeviceMapper,
+  private val deviceActivationMapper: AthenaDeviceActivationMapper,
 ) : ElectronicMonitoringDataStore {
 
   override fun getBatteryLevelReportedEvents(): Sequence<BatteryLevelReported> = sequence {
@@ -89,6 +92,43 @@ class AthenaElectronicMonitoringDataStore(
 
           yield(
             deviceMapper.map(
+              row.toMap(columnNames),
+            ),
+          )
+        }
+      }
+  }
+
+  override fun getDeviceActivations(): Sequence<DeviceActivation> = sequence {
+    val queryExecutionId = startQuery(
+      deviceActivationsQuery(),
+    )
+
+    waitForQuery(queryExecutionId)
+
+    val request = GetQueryResultsRequest.builder()
+      .queryExecutionId(queryExecutionId)
+      .build()
+
+    var firstRow = true
+
+    datastoreAthenaClient
+      .getQueryResultsPaginator(request)
+      .forEach { page ->
+        val columnNames = page
+          .resultSet()
+          .resultSetMetadata()
+          .columnInfo()
+          .map { it.name() }
+
+        page.resultSet().rows().forEach { row ->
+          if (firstRow) {
+            firstRow = false
+            return@forEach
+          }
+
+          yield(
+            deviceActivationMapper.map(
               row.toMap(columnNames),
             ),
           )
@@ -196,6 +236,29 @@ class AthenaElectronicMonitoringDataStore(
     )
     WHERE row_number = 1
     ORDER BY device_id
+    """.trimIndent()
+
+  private fun deviceActivationsQuery(): String =
+    """
+    SELECT
+        device_activation_id, 
+        device_id,
+        device_activation_date,
+        device_deactivation_date
+    FROM (
+        SELECT
+            device_activation_id,
+            device_id,
+            device_activation_date,
+            device_deactivation_date,
+            ROW_NUMBER() OVER (
+                PARTITION BY device_id, device_activation_date
+                ORDER BY __datetime_added DESC
+            ) AS row_number
+        FROM staged_mdss_test_dbt.device_activation
+    )
+    WHERE row_number = 1 AND device_id = 1121
+    ORDER BY device_id, device_activation_date
     """.trimIndent()
 
   private fun Row.toMap(

@@ -14,8 +14,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rul
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryLevelRuleV1
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.Device
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.ElectronicMonitoringDataStore
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeElectronicMonitoringDataStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeRuleConfigurationStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.RuleConfigurationFixtures.givenPublishedBatteryLevelConfiguration
 import java.util.UUID
@@ -235,15 +234,6 @@ class SynchroniseDeviceComplianceTest {
     val count = useCase.synchronise()
 
     assertThat(count).isEqualTo(2)
-  }
-
-  private class FakeElectronicMonitoringDataStore(
-    private val devices: List<Device>,
-  ) : ElectronicMonitoringDataStore {
-
-    override fun getDevices(): Sequence<Device> = devices.asSequence()
-
-    override fun getBatteryLevelReportedEvents(): Sequence<BatteryLevelReported> = emptySequence()
   }
 
   private class FakeDeviceComplianceStore(

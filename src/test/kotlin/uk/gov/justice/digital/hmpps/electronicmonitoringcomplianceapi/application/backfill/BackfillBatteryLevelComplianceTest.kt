@@ -6,11 +6,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.application.evaluation.EvaluateBatteryLevelEvent
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.rule.battery.BatteryPercentage
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.Device
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.DeviceId
-import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.ElectronicMonitoringDataStore
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.EventId
 import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.telemetry.events.BatteryLevelReported
+import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.testutils.FakeElectronicMonitoringDataStore
 import java.time.Instant
 
 class BackfillBatteryLevelComplianceTest {
@@ -33,7 +32,7 @@ class BackfillBatteryLevelComplianceTest {
 
     // Given a fake datastore with two events
     val datastore = FakeElectronicMonitoringDataStore(
-      events,
+      events = events,
     )
 
     val backfill = BackfillBatteryLevelCompliance(
@@ -68,12 +67,4 @@ class BackfillBatteryLevelComplianceTest {
       batteryPercentage,
     ),
   )
-
-  private class FakeElectronicMonitoringDataStore(
-    private val events: List<BatteryLevelReported>,
-  ) : ElectronicMonitoringDataStore {
-    override fun getBatteryLevelReportedEvents(): Sequence<BatteryLevelReported> = events.asSequence()
-
-    override fun getDevices(): Sequence<Device> = listOf<Device>().asSequence()
-  }
 }
