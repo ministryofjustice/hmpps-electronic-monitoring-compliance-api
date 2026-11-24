@@ -13,6 +13,13 @@ generic-service:
     HMPPS_AUTH_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
     SPRINGDOC_API-DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER-UI_ENABLED: "true"
+    DATASTORE_SESSION_NAME: "placeholder"
+    DATASTORE_ROLE_ARN: "placeholder"
+    DATASTORE_ATHENA_WORKGROUP: "placeholder"
+    DATASTORE_ATHENA_DATABASE: "placeholder"
+    DATASTORE_ATHENA_EVENTS_DATABASE: "placeholder"
+    DATASTORE_ATHENA_DEVICE_ACTIVATIONS_TABLE: "placeholder"
+    DATASTORE_ATHENA_EVENTS_TABLE: "placeholder"
 
   scheduledDowntime:
     enabled: true
