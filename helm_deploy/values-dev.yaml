@@ -4,6 +4,8 @@
 generic-service:
   replicaCount: 2
 
+  serviceAccountName: hmpps-electronic-monitoring-compliance-dev
+
   ingress:
     host: electronic-monitoring-compliance-api-dev.hmpps.service.justice.gov.uk
     # modsecurity_enabled: true
