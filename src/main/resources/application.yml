@@ -87,3 +87,8 @@ electronic-monitoring-datastore:
 backfill:
   battery-level:
     enabled: ${BACKFILL_BATTERY_LEVEL:false}
+
+compliance:
+  discovery:
+    fixed-delay: PT5M
+    initial-delay: PT30S
