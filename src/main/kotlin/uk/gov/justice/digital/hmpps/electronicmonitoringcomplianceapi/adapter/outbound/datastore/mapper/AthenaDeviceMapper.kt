@@ -18,7 +18,7 @@ class AthenaDeviceMapper : AthenaMapper() {
 
     return Device(
       id = DeviceId(
-        row.required("device_id").toInt(),
+        row.required("device_id").toLong(),
       ),
       // TODO - below is likely the correct logic, but the data in Athena is not correct, so we are hardcoding to ACTIVATED for now
       // TODO - i.e. some devices are deactivated but are sending battery level events, some devices are activated but send no events

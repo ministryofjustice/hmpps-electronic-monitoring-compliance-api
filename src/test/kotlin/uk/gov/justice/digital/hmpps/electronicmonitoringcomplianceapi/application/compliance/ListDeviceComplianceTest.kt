@@ -136,7 +136,7 @@ class ListDeviceComplianceTest {
   }
 
   private fun givenDeviceCompliance(
-    deviceId: Int,
+    deviceId: Long,
     status: DeviceStatus,
   ) = DeviceCompliance.create(
     deviceId = DeviceId(deviceId),
@@ -147,7 +147,7 @@ class ListDeviceComplianceTest {
   )
 
   private fun givenEvaluation(
-    deviceId: Int,
+    deviceId: Long,
     result: RuleEvaluationResult,
   ) = RuleEvaluation(
     deviceId = DeviceId(deviceId),

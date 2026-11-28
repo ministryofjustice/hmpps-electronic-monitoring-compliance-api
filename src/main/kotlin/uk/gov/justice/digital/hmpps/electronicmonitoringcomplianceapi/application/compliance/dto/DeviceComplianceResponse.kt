@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.com
 import java.time.Instant
 
 data class DeviceComplianceResponse(
-  val deviceId: Int,
+  val deviceId: Long,
   val status: DeviceStatus,
   val state: ComplianceState?,
   val stateChangedAt: Instant?,

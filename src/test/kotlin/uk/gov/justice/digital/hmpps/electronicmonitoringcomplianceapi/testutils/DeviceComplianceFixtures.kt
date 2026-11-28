@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.electronicmonitoringcomplianceapi.domain.tel
 
 object DeviceComplianceFixtures {
   fun givenDeviceCompliance(
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     status: DeviceStatus = DeviceStatus.ACTIVATED,
     ruleDefinitions: List<RuleDefinition<*>> = listOf(
       BatteryLevelRuleV1.ruleDefinition,

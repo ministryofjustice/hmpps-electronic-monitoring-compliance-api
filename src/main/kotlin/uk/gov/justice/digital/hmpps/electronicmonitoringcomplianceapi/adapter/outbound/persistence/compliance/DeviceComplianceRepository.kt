@@ -8,7 +8,7 @@ import java.util.UUID
 
 interface DeviceComplianceRepository : JpaRepository<DeviceComplianceEntity, UUID> {
   fun findByDeviceId(
-    deviceId: Int,
+    deviceId: Long,
   ): DeviceComplianceEntity?
 
   @Query(

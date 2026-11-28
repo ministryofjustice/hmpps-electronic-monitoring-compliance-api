@@ -29,7 +29,7 @@ class DiscoverDeviceActivationsTest {
 
   private fun createActivation(
     id: Long = 1L,
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     activationDate: Instant =
       Instant.parse("2026-01-01T10:00:00Z"),
     deactivationDate: Instant? = null,
