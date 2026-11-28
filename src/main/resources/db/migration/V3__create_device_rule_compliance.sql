@@ -1,7 +1,7 @@
 CREATE TABLE device_compliance
 (
     id UUID PRIMARY KEY,
-    device_id INTEGER NOT NULL,
+    device_id BIGINT NOT NULL,
     status VARCHAR(50) NOT NULL,
     state VARCHAR(50),
 
@@ -13,7 +13,7 @@ CREATE TABLE device_rule_compliance
 (
     id UUID PRIMARY KEY,
     device_compliance_id UUID NOT NULL,
-    device_id INTEGER NOT NULL,
+    device_id BIGINT NOT NULL,
     rule_id VARCHAR(100) NOT NULL,
     rule_version INTEGER NOT NULL,
     state VARCHAR(50) NOT NULL,

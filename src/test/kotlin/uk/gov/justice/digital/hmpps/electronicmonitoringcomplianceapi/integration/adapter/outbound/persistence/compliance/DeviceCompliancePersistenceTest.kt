@@ -262,7 +262,7 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
   }
 
   private fun givenDeviceCompliance(
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     status: DeviceStatus = DeviceStatus.ACTIVATED,
     state: ComplianceState = ComplianceState.NON_COMPLIANT,
   ): DeviceCompliance {
@@ -288,7 +288,7 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
   }
 
   private fun givenCompliantRuleEvaluation(
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     recordedAt: Instant = Instant.parse("2026-01-01T10:00:00Z"),
   ): RuleEvaluation = RuleEvaluation(
     deviceId = DeviceId(deviceId),
@@ -301,7 +301,7 @@ class DeviceCompliancePersistenceTest : IntegrationTestBase() {
   )
 
   private fun givenNonCompliantRuleEvaluation(
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     recordedAt: Instant = Instant.parse("2026-01-01T10:00:00Z"),
   ): RuleEvaluation = RuleEvaluation(
     deviceId = DeviceId(deviceId),

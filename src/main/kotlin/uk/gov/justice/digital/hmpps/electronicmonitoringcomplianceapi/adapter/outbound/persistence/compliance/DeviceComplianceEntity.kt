@@ -26,7 +26,7 @@ class DeviceComplianceEntity(
   val id: UUID,
 
   @Column(name = "device_id", nullable = false)
-  val deviceId: Int,
+  val deviceId: Long,
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)

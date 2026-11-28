@@ -55,7 +55,7 @@ class BackfillBatteryLevelComplianceTest {
   }
 
   private fun givenEvent(
-    eventId: Int,
+    eventId: Long,
     batteryPercentage: Int,
   ) = BatteryLevelReported(
     eventId = EventId(eventId),

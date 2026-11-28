@@ -39,7 +39,7 @@ class DeviceRuleComplianceEntity(
   val deviceCompliance: DeviceComplianceEntity,
 
   @Column(name = "device_id", nullable = false)
-  val deviceId: Int,
+  val deviceId: Long,
 
   @Column(name = "rule_id", nullable = false)
   val ruleId: String,

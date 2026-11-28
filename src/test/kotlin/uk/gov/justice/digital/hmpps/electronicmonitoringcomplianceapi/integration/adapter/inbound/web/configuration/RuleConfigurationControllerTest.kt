@@ -703,7 +703,7 @@ class RuleConfigurationControllerTest : IntegrationTestBase() {
 
   private fun deviceComplianceEntity(
     id: UUID = UUID.randomUUID(),
-    deviceId: Int = 123,
+    deviceId: Long = 123,
     status: DeviceStatus = DeviceStatus.ACTIVATED,
     state: ComplianceState = ComplianceState.COMPLIANT,
   ): DeviceComplianceEntity {

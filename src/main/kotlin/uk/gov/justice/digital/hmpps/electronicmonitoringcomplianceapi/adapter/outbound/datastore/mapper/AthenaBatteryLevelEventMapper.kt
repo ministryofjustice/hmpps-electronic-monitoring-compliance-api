@@ -11,10 +11,10 @@ class AthenaBatteryLevelEventMapper : AthenaMapper() {
 
   fun map(row: Map<String, String?>): BatteryLevelReported = BatteryLevelReported(
     eventId = EventId(
-      row.required("event_id").toInt(),
+      row.required("event_id").toLong(),
     ),
     deviceId = DeviceId(
-      row.required("device_id").toInt(),
+      row.required("device_id").toLong(),
     ),
     recordedAt = parseAthenaTimestamp(
       row.required("event_recorded_date_utc"),

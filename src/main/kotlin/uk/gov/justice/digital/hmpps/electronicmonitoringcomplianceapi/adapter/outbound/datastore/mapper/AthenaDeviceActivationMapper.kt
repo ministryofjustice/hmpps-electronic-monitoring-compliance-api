@@ -10,7 +10,7 @@ import java.time.Instant
 class AthenaDeviceActivationMapper : AthenaMapper() {
   fun map(row: Map<String, String?>): DeviceActivation = DeviceActivation(
     id = DeviceActivationId(row.required("device_activation_id").toLong()),
-    deviceId = DeviceId(row.required("device_id").toInt()), // TODO - should be Long
+    deviceId = DeviceId(row.required("device_id").toLong()),
     activationDate = parseAthenaTimestamp(row.required("device_activation_date")),
     deactivationDate = mapDeactivationDate(row["device_deactivation_date"]),
   )

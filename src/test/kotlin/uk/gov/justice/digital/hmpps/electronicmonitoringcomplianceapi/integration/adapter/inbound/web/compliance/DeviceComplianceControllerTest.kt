@@ -183,7 +183,7 @@ class DeviceComplianceControllerTest : IntegrationTestBase() {
   }
 
   private fun givenDeviceCompliance(
-    deviceId: Int,
+    deviceId: Long,
     status: DeviceStatus,
   ) = DeviceCompliance.create(
     deviceId = DeviceId(deviceId),
@@ -194,7 +194,7 @@ class DeviceComplianceControllerTest : IntegrationTestBase() {
   )
 
   private fun givenCompliantEvaluation(
-    deviceId: Int,
+    deviceId: Long,
   ) = RuleEvaluation(
     deviceId = DeviceId(deviceId),
     eventId = EventId(1),
